@@ -1,0 +1,18 @@
+:root {
+  color-scheme: dark;
+
+  --color-surface: #1c1a17;
+  --color-text: #f3ecdc;
+  --color-text-muted: #b3aa98;
+  --color-accent: #c8a050;
+
+  --font-title: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --font-ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--color-surface);
+  color: var(--coplor-text);
+  font-family: var(--font-ui);
+}
