@@ -13,6 +13,6 @@
 body {
   margin: 0;
   background: var(--color-surface);
-  color: var(--coplor-text);
+  color: var(--color-text);
   font-family: var(--font-ui);
 }

@@ -42,12 +42,12 @@ export function App() {
 function RuntimeInfoLine({ state }: { state: RuntimeInfoState }) {
   switch (state.status) {
     case 'pending':
-      return <>Adapter: ...</>;
+      return <>Adapter: …</>;
 
     case 'ready':
       return (
         <>
-          Adapter: <span className={styles.adapter}>(state.info.adapter)</span> · v
+          Adapter: <span className={styles.adapter}>{state.info.adapter}</span> · v
           {state.info.version}
         </>
       );

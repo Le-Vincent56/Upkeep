@@ -6,7 +6,7 @@ export function describeError(error: unknown): string {
     return error;
   }
 
-  // JSON.stingify returns undefined for undefined, functions, and symbols, despite its string type.
+  // JSON.stringify returns undefined for undefined, functions, and symbols, despite its string type.
   const json: string | undefined = JSON.stringify(error);
   return json ?? String(error);
 }
