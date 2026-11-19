@@ -35,4 +35,26 @@ export default defineConfig([
       ],
     },
   },
+  {
+    files: ['src/catalog/**/*.ts'],
+    rules: {
+      // Replaces the src/** entry above for these files, so the Tauri group is repeated.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['react', 'react/*', 'react-dom', 'react-dom/*'],
+              message: 'src/catalog is a pure domain module and must not import React.',
+            },
+            { group: ['@tauri-apps/*'], message: TAURI_BOUNDARY_MESSAGE },
+            {
+              group: ['**/app', '**/app/*', '**/adapters', '**/adapters/*'],
+              message: 'src/catalog must not depend on the app shell or adapters.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);

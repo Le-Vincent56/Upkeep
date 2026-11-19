@@ -33,3 +33,46 @@ describe('Tauri import boundary', () => {
     expect(messages).toEqual([]);
   });
 });
+
+describe('catalog boundary', () => {
+  const CATALOG_FILE = 'src/catalog/probe.ts';
+
+  async function ruleIds(code: string): Promise<(string | null)[]> {
+    const messages = await boundaryMessages(CATALOG_FILE, code);
+    return messages.map((message) => message.ruleId);
+  }
+
+  it('rejects React', async () => {
+    expect(
+      await ruleIds("import { useState } from 'react';\nexport const probe = useState;\n"),
+    ).toEqual(['no-restricted-imports']);
+  });
+
+  it('rejects a relative import of the app shell', async () => {
+    expect(
+      await ruleIds(
+        "import type { RuntimeInfo } from '../app/runtimeInfo';\nexport type P = RuntimeInfo;\n",
+      ),
+    ).toEqual(['no-restricted-imports']);
+  });
+
+  it('rejects a relative import of an adapter', async () => {
+    expect(
+      await ruleIds(
+        "import { createFixtureDependencies } from '../adapters/fixture';\nexport const probe = createFixtureDependencies;\n",
+      ),
+    ).toEqual(['no-restricted-imports']);
+  });
+
+  it('still rejects Tauri', async () => {
+    expect(await ruleIds(STATIC_IMPORT)).toEqual(['no-restricted-imports']);
+  });
+
+  it('allows sibling catalog imports', async () => {
+    expect(
+      await ruleIds(
+        "import type { Card } from './types';\nimport seed from './seed.json';\nexport const probe: [Card | undefined, unknown] = [undefined, seed];\n",
+      ),
+    ).toEqual([]);
+  });
+});
