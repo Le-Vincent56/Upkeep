@@ -23,7 +23,7 @@
 
 .placeholderName {
   font-family: var(--font-title);
-  font-size: 1.25rem;
+  font-size: var(--text-card-name);
 }
 
 .placeholderType {

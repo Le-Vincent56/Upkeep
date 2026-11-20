@@ -1,9 +1,10 @@
-import { useId } from 'react';
+import { useId, useRef } from 'react';
 import { ChoiceSelect } from '../../ui/ChoiceSelect';
 import type { GroupBy, SortBy, StatusFilter, ViewChoices, ViewMode } from './arrangeRows';
 import type { DeckSummary } from './contracts';
 import styles from './DeckControls.module.css';
 import { keepTogetherLabel, showingLabel, STATUS_LABELS } from './describe';
+import { useDisclosureDismiss } from './useDisclosureDismiss';
 
 const GROUP_LABELS: Record<GroupBy, string> = { cardType: 'Card type', section: 'Section' };
 const SORT_LABELS: Record<SortBy, string> = { manaValue: 'Mana value', name: 'Name' };
@@ -36,6 +37,8 @@ export function DeckControls({
   replanError,
 }: DeckControlProps) {
   const viewLabelId = useId();
+  const keepRef = useRef<HTMLDetailsElement>(null);
+  useDisclosureDismiss(keepRef);
   const views = Object.keys(VIEW_LABELS) as ViewMode[];
   const protectedNames = offeredDecks
     .filter((deck) => requestedProtectedIds.includes(deck.id))
@@ -56,7 +59,7 @@ export function DeckControls({
         {offeredDecks.length === 0 ? (
           <p className={styles.keep}>{keepLabel}</p>
         ) : (
-          <details className={styles.keep}>
+          <details className={styles.keep} ref={keepRef}>
             <summary>{keepLabel}</summary>
             <ul className={styles.decks}>
               {offeredDecks.map((deck) => (

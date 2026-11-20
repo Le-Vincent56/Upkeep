@@ -1,7 +1,7 @@
 .summary {
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: var(--layer-sticky);
   display: flex;
   align-items: flex-end;
   gap: var(--space-1);
@@ -41,6 +41,11 @@
   );
 }
 
+/* After the status rules: same specificity, so the later rule wins. */
+.part[data-empty='true'] .bar {
+  background: linear-gradient(var(--color-line), var(--color-line)) center / 100% 1px no-repeat;
+}
+
 .caption {
   display: flex;
   align-items: baseline;
@@ -64,5 +69,5 @@
 }
 
 .summary[data-filtered='true'] .part[aria-pressed='false'] {
-  opacity: 0.36;
+  opacity: var(--opacity-dimmed);
 }

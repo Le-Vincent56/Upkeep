@@ -20,14 +20,14 @@ export function BuildSummary({ counts, filter, onFilter }: BuildSummaryProps) {
           type="button"
           className={styles.part}
           data-status={status}
+          data-empty={counts[status] === 0}
           style={{ flexGrow: Math.max(counts[status], 1) }}
           aria-pressed={filter === status}
           onClick={() => onFilter(filter === status ? 'all' : status)}
         >
           <span className={styles.bar} />
           <span className={styles.caption}>
-            <span className={styles.count}>{counts[status]}</span>
-            {STATUS_LABELS[status]}
+            <span className={styles.count}>{counts[status]}</span> {STATUS_LABELS[status]}
           </span>
         </button>
       ))}
