@@ -1,0 +1,32 @@
+.image,
+.placeholder {
+  display: block;
+  width: 100%;
+  aspect-ratio: 488 / 680;
+}
+
+.image {
+  object-fit: cover;
+  background: var(--color-bg);
+}
+
+.placeholder {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--color-bg);
+  text-align: center;
+}
+
+.placeholderName {
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+}
+
+.placeholderType {
+  font-size: var(--text-small);
+  color: var(--color-text-muted);
+}

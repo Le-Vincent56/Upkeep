@@ -32,6 +32,7 @@
   --space-5: 1.5rem;
   --space-6: 2.5rem;
   --gutter: clamp(1.25rem, 3.6vw, 3.25rem);
+  --size-card-popup: 15.75rem;
 
   --radius: 3px;
   --shadow-raised: 0 1rem 2.25rem rgb(0 0 0 / 0.7);
@@ -39,6 +40,7 @@
   --motion-quick: 100ms;
   --motion-settle: 200ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-pop: cubic-bezier(0.18, 0.9, 0.3, 1.3);
 }
 
 /* A derived colour is worked out where it is declared, so it is declared again wherever the accent changes. */

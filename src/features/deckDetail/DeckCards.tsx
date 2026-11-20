@@ -1,46 +1,28 @@
-import { useState } from 'react';
+import { useMemo, useRef } from 'react';
 import type { CatalogIndex } from '../../catalog/catalogIndex';
 import { manaSymbolCodes } from '../../catalog/manaSymbols';
 import { ManaSymbols } from '../../ui/ManaSymbols';
 import { StatusMark } from '../../ui/StatusMark';
 import type { Arrangement, ShownRow, StatusFilter, ViewMode } from './arrangeRows';
+import { CardImage } from './CardImage';
+import { CardPopup } from './CardPopup';
 import styles from './DeckCards.module.css';
 import type { DeckRow } from './deckRows';
 import {
   filteredLine,
   manaCostLabel,
+  popupLines,
   rowNeeds,
   rowSuffix,
   rowTone,
   statusSummary,
   type DisplayNames,
 } from './describe';
+import { stopOrder } from './listFocus';
+import { useCardPopup } from './useCardPopup';
+import { useListFocus } from './useListFocus';
 
 const SINGLE_COLUMN_BELOW = 14;
-
-function CardImage({ row }: { readonly row: DeckRow }) {
-  const [failed, setFailed] = useState(false);
-  const image = row.displayPrinting?.images[0];
-
-  if (image === undefined || failed) {
-    return (
-      <div className={styles.placeholder}>
-        <span className={styles.placeholderName}>{row.name}</span>
-        <span className={styles.placeholderType}>{row.typeLine}</span>
-      </div>
-    );
-  }
-
-  return (
-    <img
-      className={styles.image}
-      src={image.normal}
-      alt=""
-      loading="lazy"
-      onError={() => setFailed(true)}
-    />
-  );
-}
 
 interface RowProps {
   readonly shown: ShownRow;
@@ -94,13 +76,22 @@ function RowStatus({ shown, filter, names, catalog }: RowProps) {
   );
 }
 
-function ListRow(props: RowProps) {
+interface ListRowProps extends RowProps {
+  readonly isStop: boolean;
+}
+
+function ListRow({ isStop, ...props }: ListRowProps) {
   const { row } = props.shown;
   const artCrop = row.displayPrinting?.images[0]?.artCrop;
   const cost = manaSymbolCodes(row.manaCost);
 
   return (
-    <li className={styles.row} data-tone={rowTone(row)}>
+    <li
+      className={styles.row}
+      data-tone={rowTone(row)}
+      data-entry-id={row.entryId}
+      tabIndex={isStop ? 0 : -1}
+    >
       {artCrop !== undefined && (
         <span
           className={styles.art}
@@ -124,7 +115,7 @@ function GridTile(props: RowProps) {
 
   return (
     <li className={styles.tile} data-tone={rowTone(row)}>
-      <CardImage key={row.displayPrinting?.id ?? 'none'} row={row} />
+      <CardImage key={row.displayPrinting?.id ?? 'none'} row={row} className={styles.tileImage} />
       <div className={styles.tileText}>
         <RowTitle row={row} />
         <RowStatus {...props} />
@@ -150,6 +141,13 @@ export function DeckCards({
   catalog,
   onClearFilters,
 }: DeckCardProps) {
+  // A new token hides the card, so it must change only with the arrangement or view.
+  const token = useMemo(() => ({ arrangement, view }), [arrangement, view]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const popup = useCardPopup(token, containerRef);
+  const ids = useMemo(() => stopOrder(arrangement), [arrangement]);
+  const focus = useListFocus(ids, containerRef);
+
   if (arrangement.groups.length === 0) {
     if (filter === 'all') return <p className={styles.empty}>No cards in this deck yet.</p>;
 
@@ -164,34 +162,74 @@ export function DeckCards({
   }
 
   const rowCount = arrangement.groups.reduce((sum, group) => sum + group.rows.length, 0);
-  const Row = view === 'grid' ? GridTile : ListRow;
+  const visible = popup.shown;
+  const visibleRow =
+    visible === null
+      ? undefined
+      : arrangement.groups
+          .flatMap((group) => group.rows)
+          .find((shown) => shown.row.entryId === visible.entryId)?.row;
 
   return (
-    <div
-      className={styles.groups}
-      data-view={view}
-      data-filtered={filter !== 'all'}
-      data-single={filter !== 'all' || rowCount < SINGLE_COLUMN_BELOW}
-    >
-      {arrangement.groups.map((group) => (
-        <section key={group.key} className={styles.group}>
-          <h2 className={styles.heading}>
-            {group.heading}
-            {!group.isIdeas && <span className={styles.copies}>{group.copies}</span>}
-          </h2>
-          <ul className={view === 'grid' ? styles.grid : styles.list}>
-            {group.rows.map((shown) => (
-              <Row
-                key={shown.row.entryId}
-                shown={shown}
-                filter={filter}
-                names={names}
-                catalog={catalog}
-              />
-            ))}
-          </ul>
-        </section>
-      ))}
-    </div>
+    <>
+      <div
+        ref={containerRef}
+        className={styles.groups}
+        data-view={view}
+        data-filtered={filter !== 'all'}
+        data-single={filter !== 'all' || rowCount < SINGLE_COLUMN_BELOW}
+        onPointerMove={popup.onPointerMove}
+        onPointerLeave={popup.onPointerLeave}
+        onFocus={(event) => {
+          focus.onFocus(event);
+          popup.onFocus(event);
+        }}
+        onBlur={popup.onBlur}
+        onKeyDown={(event) => {
+          popup.onKeyDown(event);
+          focus.onKeyDown(event);
+        }}
+      >
+        {arrangement.groups.map((group) => (
+          <section key={group.key} className={styles.group}>
+            <h2 className={styles.heading}>
+              {group.heading}
+              {!group.isIdeas && <span className={styles.copies}>{group.copies}</span>}
+            </h2>
+            <ul className={view === 'grid' ? styles.grid : styles.list}>
+              {group.rows.map((shown) =>
+                view === 'grid' ? (
+                  <GridTile
+                    key={shown.row.entryId}
+                    shown={shown}
+                    filter={filter}
+                    names={names}
+                    catalog={catalog}
+                  />
+                ) : (
+                  <ListRow
+                    key={shown.row.entryId}
+                    shown={shown}
+                    filter={filter}
+                    names={names}
+                    catalog={catalog}
+                    isStop={shown.row.entryId === focus.stopId}
+                  />
+                ),
+              )}
+            </ul>
+          </section>
+        ))}
+      </div>
+      {visible !== null && visibleRow !== undefined && (
+        <CardPopup
+          key={visible.count}
+          shown={visible}
+          row={visibleRow}
+          lines={popupLines(visibleRow, names, catalog)}
+          placeTick={popup.placeTick}
+        />
+      )}
+    </>
   );
 }

@@ -38,7 +38,7 @@ export function App() {
           <RuntimeInfoLine state={state} />
         </span>
       </header>
-      <div className={styles.column}>
+      <div className={styles.column} data-screen-column>
         <DeckDetailScreen deckId={startDeckId} />
       </div>
     </div>

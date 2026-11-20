@@ -18,6 +18,7 @@ import {
   headerArt,
   keepTogetherLabel,
   manaCostLabel,
+  popupLines,
   printingLabel,
   rowNeeds,
   rowSuffix,
@@ -315,5 +316,39 @@ describe('counts', () => {
       toMove: 'Available to move',
       toAcquire: 'Need to acquire',
     });
+  });
+});
+
+describe('popupLines', () => {
+  it('explains every copy of a card, Hydras kept together', () => {
+    const { rows } = walkthroughRows([IDS.hydras]);
+
+    expect(popupLines(rowFor(rows, IDS.zukoMountain), names, seedIndex)).toEqual([
+      { status: 'inBox', text: '2 in Zuko box' },
+      { status: 'toMove', text: '2 to move from Binder' },
+    ]);
+    expect(popupLines(rowFor(rows, IDS.zukoSolRing), names, seedIndex)).toEqual([
+      { status: 'toAcquire', text: '1 to acquire · Hydras is kept together' },
+    ]);
+  });
+
+  it('follows the plan when Hydras is not kept together', () => {
+    const { rows } = walkthroughRows([]);
+
+    expect(popupLines(rowFor(rows, IDS.zukoSolRing), names, seedIndex)).toEqual([
+      { status: 'toMove', text: '1 to move from Hydras box · leaves Hydras short' },
+    ]);
+  });
+
+  it('reads an idea as not counted', () => {
+    const { rows } = walkthroughRows();
+
+    expect(popupLines(rowFor(rows, IDS.zukoMaybeSolRing), names, seedIndex)).toEqual([
+      { status: null, text: 'Idea · not counted' },
+    ]);
+  });
+
+  it('is empty for a row the plan gave no allocations', () => {
+    expect(popupLines(row(), names, seedIndex)).toEqual([]);
   });
 });

@@ -205,6 +205,20 @@ export function filteredLine(
   return `${allocationLine(allocation, row, names, catalog)} · ${row.demand} wanted`;
 }
 
+export interface PopupLine {
+  readonly status: AllocationStatus | null;
+  readonly text: string;
+}
+
+export function popupLines(row: DeckRow, names: DisplayNames, catalog: CatalogIndex): PopupLine[] {
+  if (row.section === 'maybeboard') return [{ status: null, text: statusSummary(row) }];
+
+  return row.allocations.map((allocation) => ({
+    status: allocation.status,
+    text: allocationLine(allocation, row, names, catalog),
+  }));
+}
+
 export function keepTogetherLabel(protectedNames: readonly string[], offeredCount: number): string {
   if (offeredCount === 0) return 'Keep together · No other assembled decks';
 
