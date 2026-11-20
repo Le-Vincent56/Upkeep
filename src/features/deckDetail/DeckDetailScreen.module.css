@@ -1,0 +1,14 @@
+.screen {
+  min-height: 100%;
+}
+
+.deck {
+  display: flex;
+  flex-direction: column;
+}
+
+.notice {
+  margin: 0;
+  padding: var(--space-6) var(--gutter);
+  color: var(--color-text-muted);
+}

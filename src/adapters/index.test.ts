@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { CARDS, IDS, walkthroughSnapshot } from '../planning/fixtures/zukoHydras';
 import { FIXTURE_VERSION } from './fixture';
 import { loadDependencies } from './index';
 
@@ -66,5 +67,42 @@ describe('loadDependencies', () => {
 
     await dependencies.runtimeInfo.loadRuntimeInfo();
     expect(invokeMock).toHaveBeenCalledWith('get_runtime_info');
+  });
+});
+
+describe.each([
+  ['fixture', false],
+  ['desktop', true],
+] as const)('%s deck readers', (_adapter, insideTauri) => {
+  it('serves the walkthrough snapshot for a selection', async () => {
+    const { buildSnapshots } = await loadDependencies(insideTauri);
+
+    await expect(
+      buildSnapshots.loadBuildSnapshot({ targetDeckIds: [IDS.zuko], protectedDeckIds: [] }),
+    ).resolves.toEqual(walkthroughSnapshot({ targets: [IDS.zuko], protectedIds: [] }));
+  });
+
+  it('serves deck details and rejects an unknown deck', async () => {
+    const { deckDetails } = await loadDependencies(insideTauri);
+
+    await expect(deckDetails.loadDeckDetail(IDS.zuko)).resolves.toMatchObject({
+      name: 'Zuko Spellslinger',
+    });
+    await expect(deckDetails.loadDeckDetail('deck-missing')).rejects.toThrow('deck-missing');
+  });
+
+  it('wires the seed catalog and the start deck', async () => {
+    const { catalog, startDeckId } = await loadDependencies(insideTauri);
+
+    expect(catalog.cardByOracleId(CARDS.mountain)?.name).toBe('Mountain');
+    expect(startDeckId).toBe(IDS.zuko);
+  });
+
+  it('never calls a native command for deck reads', async () => {
+    const { buildSnapshots, deckDetails } = await loadDependencies(insideTauri);
+
+    await buildSnapshots.loadBuildSnapshot({ targetDeckIds: [IDS.zuko], protectedDeckIds: [] });
+    await deckDetails.loadDeckDetail(IDS.zuko);
+    expect(invokeMock).not.toHaveBeenCalled();
   });
 });

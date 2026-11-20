@@ -1,0 +1,20 @@
+.mark {
+  flex: none;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 0.5625rem;
+  height: 0.5625rem;
+  border-radius: 50%;
+}
+
+.mark[data-status='inBox'] {
+  background: var(--color-status-in-box);
+}
+
+.mark[data-status='toMove'] {
+  background: var(--color-status-move);
+}
+
+.mark[data-status='toAcquire'] {
+  border: 1.5px solid var(--color-status-acquire);
+}

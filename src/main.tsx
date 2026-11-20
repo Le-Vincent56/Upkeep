@@ -1,3 +1,6 @@
+import '@fontsource/cormorant-garamond/400.css';
+import '@fontsource/cormorant-garamond/500.css';
+import '@fontsource/cormorant-garamond/400-italic.css';
 import './app/tokens.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

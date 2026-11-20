@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { DeckDetailScreen } from '../features/deckDetail/DeckDetailScreen';
 import styles from './App.module.css';
 import { useDependencies } from './dependencies';
 import { describeError } from './describeError';
@@ -10,7 +11,7 @@ type RuntimeInfoState =
   | { status: 'failed'; message: string };
 
 export function App() {
-  const { runtimeInfo } = useDependencies();
+  const { runtimeInfo, startDeckId } = useDependencies();
   const [state, setState] = useState<RuntimeInfoState>({ status: 'pending' });
 
   useEffect(() => {
@@ -30,12 +31,17 @@ export function App() {
   }, [runtimeInfo]);
 
   return (
-    <main className={styles.screen}>
-      <h1 className={styles.title}>Upkeep</h1>
-      <p className={styles.status}>
-        <RuntimeInfoLine state={state} />
-      </p>
-    </main>
+    <div className={styles.shell}>
+      <header className={styles.bar}>
+        <span className={styles.title}>Upkeep</span>
+        <span className={styles.status}>
+          <RuntimeInfoLine state={state} />
+        </span>
+      </header>
+      <div className={styles.column}>
+        <DeckDetailScreen deckId={startDeckId} />
+      </div>
+    </div>
   );
 }
 

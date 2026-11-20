@@ -52,6 +52,81 @@ export default defineConfig([
               group: ['**/app', '**/app/*', '**/adapters', '**/adapters/*'],
               message: 'src/catalog must not depend on the app shell or adapters.',
             },
+            {
+              group: ['**/planning', '**/planning/**'],
+              message: 'src/catalog must not depend on player-side modules.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/planning/**/*.ts'],
+    rules: {
+      // Replaces the src/** entry above for these files, so the Tauri group is repeated.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['react', 'react/*', 'react-dom', 'react-dom/*'],
+              message: 'src/planning is a pure domain module and must not import React.',
+            },
+            { group: ['@tauri-apps/*'], message: TAURI_BOUNDARY_MESSAGE },
+            {
+              group: ['**/app', '**/app/*', '**/adapters', '**/adapters/*'],
+              message: 'src/planning must not depend on the app shell or adapters.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/ui/**/*.{ts,tsx}'],
+    rules: {
+      // Replaces the src/** entry above for these files, so the Tauri group is repeated.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { group: ['@tauri-apps/*'], message: TAURI_BOUNDARY_MESSAGE },
+            {
+              group: [
+                '**/adapters',
+                '**/adapters/**',
+                '**/app',
+                '**/app/**',
+                '**/features',
+                '**/features/**',
+                '**/planning',
+                '**/planning/**',
+              ],
+              message:
+                'src/ui holds presentational pieces only: React and src/catalog, nothing else from the app.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/features/**/*.{ts,tsx}'],
+    ignores: ['src/features/**/*.test.ts'],
+    rules: {
+      // Replaces the src/** entry above for these files, so the Tauri group is repeated.
+      // Tests are exempt so they can drive the fixture readers.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { group: ['@tauri-apps/*'], message: TAURI_BOUNDARY_MESSAGE },
+            {
+              group: ['**/adapters', '**/adapters/**'],
+              message:
+                'Features receive capabilities through AppDependencies, never from src/adapters.',
+            },
           ],
         },
       ],

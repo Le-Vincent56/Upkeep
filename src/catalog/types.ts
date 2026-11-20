@@ -27,6 +27,7 @@ export interface PrintingImage {
   readonly normal: string;
   readonly artCrop: string;
   readonly artist: string;
+  readonly accent?: string;
 }
 
 export interface Printing {

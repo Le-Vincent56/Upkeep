@@ -132,6 +132,35 @@ describe('loadCatalog', () => {
     );
   });
 
+  describe('image accent', () => {
+    function withAccent(accent: unknown): unknown {
+      const image = {
+        normal: 'https://cards.scryfall.io/normal/front/0/0/test.jpg',
+        artCrop: 'https://cards.scryfall.io/art_crop/front/0/0/test.jpg',
+        artist: 'Test Artist',
+        accent,
+      };
+      return rawCatalog([rawCard()], [rawPrinting({ images: [image] })]);
+    }
+
+    it('accepts an image with an accent', () => {
+      const raw = withAccent('#e8662a');
+      expect(loadCatalog(raw)).toEqual(raw);
+    });
+
+    it.each(['red', '#fff', '#E8662A', '#e8662a;background:url(x)', 42])(
+      'rejects the accent %j',
+      (accent) => {
+        expectProblem(
+          withAccent(accent),
+          TEST_PRINTING_ID,
+          'images[0]',
+          'accent must be a #rrggbb color',
+        );
+      },
+    );
+  });
+
   it('reports every problem, not only the first', () => {
     const raw = rawCatalog([rawCard({ layout: 'split' })], [rawPrinting({ finishes: ['gold'] })]);
     expectProblem(raw, TEST_ORACLE_ID, 'layout');

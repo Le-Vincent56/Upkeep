@@ -99,7 +99,8 @@
         {
           "normal": "https://cards.scryfall.io/normal/front/c/1/c1f93f78-645b-4f21-a80b-5542f3328111.jpg?1783904751",
           "artCrop": "https://cards.scryfall.io/art_crop/front/c/1/c1f93f78-645b-4f21-a80b-5542f3328111.jpg?1783904751",
-          "artist": "Barbara Rosiak"
+          "artist": "Barbara Rosiak",
+          "accent": "#d5733e"
         }
       ]
     },
@@ -117,7 +118,8 @@
         {
           "normal": "https://cards.scryfall.io/normal/front/4/6/46ca0b66-a000-4483-b916-f5b89e710244.jpg?1783915591",
           "artCrop": "https://cards.scryfall.io/art_crop/front/4/6/46ca0b66-a000-4483-b916-f5b89e710244.jpg?1783915591",
-          "artist": "Mike Bierek"
+          "artist": "Mike Bierek",
+          "accent": "#4397d0"
         }
       ]
     },
@@ -135,7 +137,8 @@
         {
           "normal": "https://cards.scryfall.io/normal/front/c/4/c44f81ca-f72f-445c-8901-3a894a2a47f9.jpg?1783904905",
           "artCrop": "https://cards.scryfall.io/art_crop/front/c/4/c44f81ca-f72f-445c-8901-3a894a2a47f9.jpg?1783904905",
-          "artist": "Salvatorre Zee Yazzie"
+          "artist": "Salvatorre Zee Yazzie",
+          "accent": "#d05c43"
         }
       ]
     },
@@ -153,7 +156,8 @@
         {
           "normal": "https://cards.scryfall.io/normal/front/e/6/e62d3bcc-7bb4-42be-90a9-caf3c1caa29d.jpg?1783904927",
           "artCrop": "https://cards.scryfall.io/art_crop/front/e/6/e62d3bcc-7bb4-42be-90a9-caf3c1caa29d.jpg?1783904927",
-          "artist": "Jo Cordisco"
+          "artist": "Jo Cordisco",
+          "accent": "#e8662a"
         }
       ]
     },
@@ -171,12 +175,14 @@
         {
           "normal": "https://cards.scryfall.io/normal/front/4/7/47f7d313-8333-41fe-8bfa-c96774dac228.jpg?1783916971",
           "artCrop": "https://cards.scryfall.io/art_crop/front/4/7/47f7d313-8333-41fe-8bfa-c96774dac228.jpg?1783916971",
-          "artist": "David Auden Nash"
+          "artist": "David Auden Nash",
+          "accent": "#4397d0"
         },
         {
           "normal": "https://cards.scryfall.io/normal/back/4/7/47f7d313-8333-41fe-8bfa-c96774dac228.jpg?1783916971",
           "artCrop": "https://cards.scryfall.io/art_crop/back/4/7/47f7d313-8333-41fe-8bfa-c96774dac228.jpg?1783916971",
-          "artist": "David Auden Nash"
+          "artist": "David Auden Nash",
+          "accent": "#d0435a"
         }
       ]
     }

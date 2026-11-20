@@ -4,6 +4,7 @@ import type { Card, CardLayout, Catalog, Color, Finish, Printing } from './types
 const LAYOUTS: readonly CardLayout[] = ['normal', 'transform'];
 const COLORS: readonly Color[] = ['W', 'U', 'B', 'R', 'G'];
 const FINISHES: readonly Finish[] = ['nonfoil', 'foil', 'etched'];
+const HEX_COLOR = /^#[0-9a-f]{6}$/;
 
 type Fields = Record<string, unknown>;
 
@@ -31,6 +32,11 @@ function fieldChecker(fields: Fields, label: string, problems: string[]) {
     },
     optionalString(key: string): void {
       if (fields[key] !== undefined && typeof fields[key] !== 'string') fail(key, 'a string');
+    },
+    optionalHexColor(key: string): void {
+      const value = fields[key];
+      if (value === undefined) return;
+      if (typeof value !== 'string' || !HEX_COLOR.test(value)) fail(key, 'a #rrggbb color');
     },
     number(key: string): void {
       const value = fields[key];
@@ -104,6 +110,9 @@ function checkImage(raw: unknown, label: string, problems: string[]): void {
   check.string('normal');
   check.string('artCrop');
   check.string('artist');
+
+  // Strict because the accent is written into a style attribute
+  check.optionalHexColor('accent');
 }
 
 function checkPrinting(raw: unknown, index: number, problems: string[]) {

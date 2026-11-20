@@ -10,6 +10,7 @@ const SPEC_PRINTING_IDS = [
   '47f7d313-8333-41fe-8bfa-c96774dac228',
 ];
 const MOM_POLUKRANOS = '47f7d313-8333-41fe-8bfa-c96774dac228';
+const TLA_FIRE_LORD_ZUKO = 'e62d3bcc-7bb4-42be-90a9-caf3c1caa29d';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 describe('seedCatalog', () => {
@@ -50,6 +51,17 @@ describe('seedCatalog', () => {
         expect(image.artist).not.toBe('');
       }
     }
+  });
+
+  it('gives every image a lowercase #rrggbb accent', () => {
+    for (const printing of seedCatalog.printings) {
+      for (const image of printing.images) expect(image.accent).toMatch(/^#[0-9a-f]{6}$/);
+    }
+  });
+
+  it('keeps the approved accent for Fire Lord Zuko', () => {
+    const zuko = seedCatalog.printings.find((printing) => printing.id === TLA_FIRE_LORD_ZUKO);
+    expect(zuko?.images[0]?.accent).toBe('#e8662a');
   });
 
   it('gives the double-faced commander a front and back image', () => {

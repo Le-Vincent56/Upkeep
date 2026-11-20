@@ -1,18 +1,89 @@
 :root {
   color-scheme: dark;
 
-  --color-surface: #1c1a17;
-  --color-text: #f3ecdc;
-  --color-text-muted: #b3aa98;
-  --color-accent: #c8a050;
+  --color-bg: #060607;
+  --color-surface: #0d0d0f;
+  --color-surface-raised: #17171a;
+  --color-line: #24242a;
+  --color-line-soft: rgb(255 255 255 / 0.07);
+  --color-text: #efede7;
+  --color-text-muted: #94939a;
+  --color-text-dim: #5d5c63;
+  --color-accent: var(--color-text);
+  --color-focus: var(--color-text);
 
-  --font-title: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --color-status-in-box: #6c6b73;
+  --color-status-acquire: var(--color-text);
+
+  --font-title:
+    'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
   --font-ui: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --text-title: clamp(3.75rem, 6.7vw, 6.75rem);
+  --text-lede: 1.4375rem;
+  --text-body: 0.9375rem;
+  --text-small: 0.84375rem;
+  --text-caps: 0.71875rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2.5rem;
+  --gutter: clamp(1.25rem, 3.6vw, 3.25rem);
+
+  --radius: 3px;
+  --shadow-raised: 0 1rem 2.25rem rgb(0 0 0 / 0.7);
+
+  --motion-quick: 100ms;
+  --motion-settle: 200ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* A derived colour is worked out where it is declared, so it is declared again wherever the accent changes. */
+:root,
+[data-accent] {
+  --color-status-move: color-mix(in srgb, var(--color-accent) 55%, #fff);
 }
 
 body {
   margin: 0;
-  background: var(--color-surface);
+  overflow: hidden;
+  background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-ui);
+  font-size: var(--text-body);
+  line-height: 1.45;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-quick: 0ms;
+    --motion-settle: 0ms;
+  }
 }
