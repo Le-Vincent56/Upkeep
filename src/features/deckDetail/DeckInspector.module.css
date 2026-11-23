@@ -47,9 +47,7 @@
   padding: var(--space-1) var(--space-5) var(--space-1) var(--space-2);
   border: 1px solid var(--color-line);
   border-radius: var(--radius);
-  background: var(--color-surface)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' fill='none' stroke='%2394939a' stroke-width='1.5'/%3E%3C/svg%3E")
-    no-repeat right var(--space-2) center;
+  background: var(--color-surface) var(--image-chevron) no-repeat right var(--space-2) center;
   cursor: pointer;
 }
 

@@ -46,7 +46,7 @@ export function createDeckBuildRequests(
       lastGood = build;
       dispatch({ type: 'replanned', requestId, build });
     } catch (error) {
-      requested = lastGood.protectedDeckIds;
+      if (requestId === lastRequest) requested = lastGood.protectedDeckIds;
       dispatch({ type: 'replanFailed', requestId, message: describeError(error) });
     }
   }
@@ -63,6 +63,7 @@ export function createDeckBuildRequests(
       const requestId = nextRequest();
       dispatch({ type: 'editRequested', requestId, edit });
       enqueue(async () => {
+        // A failed write skips every write queued behind it; one replan then shows what was stored.
         if (requestId < dropBelow) return;
 
         try {

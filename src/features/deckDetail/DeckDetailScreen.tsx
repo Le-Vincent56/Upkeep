@@ -13,7 +13,7 @@ import {
   type ViewMode,
 } from './arrangeRows';
 import { BuildSummary } from './BuildSummary';
-import type { ReadyDeckBuild } from './deckBuildState';
+import type { EditError, ReadyDeckBuild } from './deckBuildState';
 import { DeckCards, type PinSource } from './DeckCards';
 import { DeckControls } from './DeckControls';
 import styles from './DeckDetailScreen.module.css';
@@ -30,6 +30,7 @@ interface Pin {
   readonly card: DeckRow;
   readonly removed: { readonly entry: DeckEntry; readonly at: number } | null;
   readonly focusKey: number | null;
+  readonly errorBefore: EditError | null;
 }
 
 function focusListRow(entryId: string | null) {
@@ -78,7 +79,7 @@ function ReadyDeck({ state, onProtectedChange, onEdit }: ReadyDeckProps) {
       if (via === 'pointer' && togglePin(current?.entryId ?? null, entryId) === null) return null;
 
       const focusKey = via === 'keyboard' ? (current?.focusKey ?? 0) + 1 : null;
-      return { entryId, card, removed: null, focusKey };
+      return { entryId, card, removed: null, focusKey, errorBefore: state.editError };
     });
   }
 
@@ -109,8 +110,11 @@ function ReadyDeck({ state, onProtectedChange, onEdit }: ReadyDeckProps) {
     setPin({ ...pin, focusKey: (pin.focusKey ?? 0) + 1 });
   }
 
+  // The spec clears an edit error on the next pin, so one raised before this pin stays hidden.
   const editError =
-    pin !== null && state.editError?.entryId === pin.entryId ? state.editError.message : null;
+    pin !== null && state.editError !== pin.errorBefore && state.editError?.entryId === pin.entryId
+      ? state.editError.message
+      : null;
 
   return (
     <div className={styles.deck} {...accentProps(accent)}>
@@ -144,7 +148,7 @@ function ReadyDeck({ state, onProtectedChange, onEdit }: ReadyDeckProps) {
         catalog={catalog}
         pinnedEntryId={pin?.entryId ?? null}
         onPin={pinRow}
-        onUnpin={unpin}
+        onUnpin={() => setPin(null)}
         onClearFilters={() => setFilter('all')}
       />
       {pin !== null &&

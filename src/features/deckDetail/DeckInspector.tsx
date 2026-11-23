@@ -72,6 +72,7 @@ interface QuantityProps {
 }
 
 function Quantity({ id, entryId, quantity, onEdit }: QuantityProps) {
+  const cancelled = useRef(false);
   const [draft, setDraft] = useState<string | null>(null);
 
   function setQuantity(next: number) {
@@ -80,6 +81,12 @@ function Quantity({ id, entryId, quantity, onEdit }: QuantityProps) {
   }
 
   function commit() {
+    if (cancelled.current) {
+      cancelled.current = false;
+      setDraft(null);
+      return;
+    }
+
     const next = draft === null ? null : parseQuantity(draft);
     if (next === null) setDraft(null);
     else setQuantity(next);
@@ -106,6 +113,9 @@ function Quantity({ id, entryId, quantity, onEdit }: QuantityProps) {
         onBlur={commit}
         onKeyDown={(event) => {
           if (event.key === 'Enter') commit();
+
+          // Esc unpins the panel, and the blur that follows must not save the draft.
+          if (event.key === 'Escape') cancelled.current = true;
         }}
       />
       <button

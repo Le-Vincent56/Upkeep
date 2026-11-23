@@ -55,6 +55,8 @@
 
   --radius: 3px;
   --radius-card: 4.6% / 3.3%;
+  /* Its stroke is --color-text-muted, written out because an image can't read a variable. */
+  --image-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' fill='none' stroke='%2394939a' stroke-width='1.5'/%3E%3C/svg%3E");
   --shadow-raised: 0 1rem 2.25rem rgb(0 0 0 / 0.7);
   --opacity-dimmed: 0.36;
 
