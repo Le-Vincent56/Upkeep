@@ -1,5 +1,6 @@
 import { compareText } from '../../planning/rules';
-import type { Allocation, Counts, Section } from '../../planning/types';
+import type { Section } from '../../decks/types';
+import type { Allocation, Counts } from '../../planning/types';
 import { CARD_TYPE_ORDER, type DeckRow } from './deckRows';
 import { CARD_TYPE_LABELS, SECTION_LABELS, type AllocationStatus } from './describe';
 

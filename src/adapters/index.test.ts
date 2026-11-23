@@ -105,4 +105,31 @@ describe.each([
     await deckDetails.loadDeckDetail(IDS.zuko);
     expect(invokeMock).not.toHaveBeenCalled();
   });
+
+  it('serves a deck writer whose edits show in the next snapshot', async () => {
+    const { buildSnapshots, deckWriter } = await loadDependencies(insideTauri);
+
+    await deckWriter.editDeck(IDS.zuko, {
+      kind: 'setQuantity',
+      entryId: IDS.zukoMountain,
+      quantity: 6,
+    });
+    const snapshot = await buildSnapshots.loadBuildSnapshot({
+      targetDeckIds: [IDS.zuko],
+      protectedDeckIds: [],
+    });
+
+    expect(
+      snapshot.decks
+        .find((deck) => deck.id === IDS.zuko)
+        ?.entries.find((entry) => entry.id === IDS.zukoMountain)?.quantity,
+    ).toBe(6);
+  });
+
+  it('never calls a native command for deck edits', async () => {
+    const { deckWriter } = await loadDependencies(insideTauri);
+
+    await deckWriter.editDeck(IDS.zuko, { kind: 'removeEntry', entryId: IDS.zukoMountain });
+    expect(invokeMock).not.toHaveBeenCalled();
+  });
 });

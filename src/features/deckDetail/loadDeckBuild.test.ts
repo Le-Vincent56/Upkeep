@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createFixtureDeckReaders } from '../../adapters/fixture';
+import { createFixtureDeckStore } from '../../adapters/fixtureDeckStore';
 import { DRAFT_DETAIL, HYDRAS_DETAIL, ZUKO_DETAIL } from '../../adapters/fixtures/walkthroughDecks';
 import { seedIndex } from '../../catalog/seedCatalog';
 import { IDS, walkthroughSnapshot } from '../../planning/fixtures/zukoHydras';
@@ -12,7 +12,7 @@ import {
 } from './loadDeckBuild';
 
 function fixtureReaders(): DeckBuildReaders {
-  return { ...createFixtureDeckReaders(), catalog: seedIndex };
+  return { ...createFixtureDeckStore(seedIndex), catalog: seedIndex };
 }
 
 describe('defaultProtectedIds', () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { DeckEdit } from '../../decks/edits';
 import { IDS } from '../../planning/fixtures/zukoHydras';
 import {
   deckBuildReducer,
@@ -39,7 +40,9 @@ describe('deckBuildReducer', () => {
       build: kept,
       requestedProtectedIds: [IDS.hydras],
       pendingRequest: null,
+      pendingEdits: [],
       replanError: null,
+      editError: null,
     });
   });
 
@@ -151,5 +154,109 @@ describe('deckBuildReducer', () => {
     expect(deckBuildReducer(second, { type: 'replanFailed', requestId: 1, message: 'boom' })).toBe(
       second,
     );
+  });
+});
+
+describe('deckBuildReducer edits', () => {
+  const moreMountains: DeckEdit = { kind: 'setQuantity', entryId: IDS.zukoMountain, quantity: 5 };
+  const evenMore: DeckEdit = { kind: 'setQuantity', entryId: IDS.zukoMountain, quantity: 6 };
+
+  it('records an edit and keeps the shown plan', () => {
+    const failedBefore: ReadyDeckBuild = {
+      ...ready(),
+      replanError: 'earlier',
+      editError: { entryId: IDS.zukoSolRing, message: 'earlier' },
+    };
+    const state = readyOf(
+      deckBuildReducer(failedBefore, { type: 'editRequested', requestId: 1, edit: moreMountains }),
+    );
+
+    expect(state.build).toBe(kept);
+    expect(state.pendingRequest).toBe(1);
+    expect(state.pendingEdits).toEqual([moreMountains]);
+    expect(state.replanError).toBeNull();
+    expect(state.editError).toBeNull();
+  });
+
+  it('ignores an edit before the deck is ready', () => {
+    const action = { type: 'editRequested', requestId: 1, edit: moreMountains } as const;
+
+    expect(deckBuildReducer(INITIAL_DECK_BUILD_STATE, action)).toBe(INITIAL_DECK_BUILD_STATE);
+  });
+
+  it('keeps every edit still waiting, newest last, and waits for the newest request', () => {
+    const first = deckBuildReducer(ready(), {
+      type: 'editRequested',
+      requestId: 1,
+      edit: moreMountains,
+    });
+    const second = readyOf(
+      deckBuildReducer(first, { type: 'editRequested', requestId: 2, edit: evenMore }),
+    );
+
+    expect(second.pendingEdits).toEqual([moreMountains, evenMore]);
+    expect(second.pendingRequest).toBe(2);
+    expect(deckBuildReducer(second, { type: 'replanned', requestId: 1, build: unprotected })).toBe(
+      second,
+    );
+  });
+
+  it('empties the waiting edits once the newest replan lands', () => {
+    const requested = deckBuildReducer(ready(), {
+      type: 'editRequested',
+      requestId: 1,
+      edit: moreMountains,
+    });
+    const edited = fakeBuild([IDS.hydras]);
+    const state = readyOf(
+      deckBuildReducer(requested, { type: 'replanned', requestId: 1, build: edited }),
+    );
+
+    expect(state.build).toBe(edited);
+    expect(state.pendingEdits).toEqual([]);
+    expect(state.pendingRequest).toBeNull();
+  });
+
+  it('records a failed edit and waits for the replan that follows it', () => {
+    const requested = deckBuildReducer(ready(), {
+      type: 'editRequested',
+      requestId: 1,
+      edit: moreMountains,
+    });
+    const failed = readyOf(
+      deckBuildReducer(requested, {
+        type: 'editFailed',
+        requestId: 2,
+        entryId: IDS.zukoMountain,
+        message: 'boom',
+      }),
+    );
+
+    expect(failed.build).toBe(kept);
+    expect(failed.pendingEdits).toEqual([]);
+    expect(failed.pendingRequest).toBe(2);
+    expect(failed.editError).toEqual({ entryId: IDS.zukoMountain, message: 'boom' });
+
+    const refreshed = fakeBuild([IDS.hydras]);
+    const state = readyOf(
+      deckBuildReducer(failed, { type: 'replanned', requestId: 2, build: refreshed }),
+    );
+    expect(state.build).toBe(refreshed);
+    expect(state.editError).toEqual({ entryId: IDS.zukoMountain, message: 'boom' });
+  });
+
+  it('empties the waiting edits when their replan fails', () => {
+    const requested = deckBuildReducer(ready(), {
+      type: 'editRequested',
+      requestId: 1,
+      edit: moreMountains,
+    });
+    const state = readyOf(
+      deckBuildReducer(requested, { type: 'replanFailed', requestId: 1, message: 'boom' }),
+    );
+
+    expect(state.build).toBe(kept);
+    expect(state.pendingEdits).toEqual([]);
+    expect(state.replanError).toBe('boom');
   });
 });

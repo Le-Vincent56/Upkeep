@@ -1,11 +1,5 @@
 import type { Finish } from '../catalog/types';
-
-export type Section = 'commander' | 'main' | 'sideboard' | 'maybeboard';
-
-export interface ExactPrinting {
-  readonly printingId: string;
-  readonly finish: Finish | null;
-}
+import type { ExactPrinting, Section } from '../decks/types';
 
 export interface SnapshotEntry {
   readonly id: string;

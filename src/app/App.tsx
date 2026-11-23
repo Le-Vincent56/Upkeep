@@ -3,6 +3,7 @@ import { DeckDetailScreen } from '../features/deckDetail/DeckDetailScreen';
 import styles from './App.module.css';
 import { useDependencies } from './dependencies';
 import { describeError } from './describeError';
+import { InspectorSlotContext } from './inspectorSlot';
 import type { RuntimeInfo } from './runtimeInfo';
 
 type RuntimeInfoState =
@@ -13,6 +14,7 @@ type RuntimeInfoState =
 export function App() {
   const { runtimeInfo, startDeckId } = useDependencies();
   const [state, setState] = useState<RuntimeInfoState>({ status: 'pending' });
+  const [inspectorSlot, setInspectorSlot] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -38,9 +40,14 @@ export function App() {
           <RuntimeInfoLine state={state} />
         </span>
       </header>
-      <div className={styles.column} data-screen-column>
-        <DeckDetailScreen deckId={startDeckId} />
-      </div>
+      <InspectorSlotContext value={inspectorSlot}>
+        <div className={styles.body}>
+          <div className={styles.column} data-screen-column>
+            <DeckDetailScreen deckId={startDeckId} />
+          </div>
+          <aside ref={setInspectorSlot} className={styles.inspector} aria-label="Pinned card" />
+        </div>
+      </InspectorSlotContext>
     </div>
   );
 }

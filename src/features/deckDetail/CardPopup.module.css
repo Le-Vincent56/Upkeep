@@ -40,7 +40,7 @@
 
 .card {
   overflow: hidden;
-  border-radius: 4.6% / 3.3%;
+  border-radius: var(--radius-card);
   background: var(--color-surface-raised);
   box-shadow:
     0 0 0 1px var(--color-line-soft),

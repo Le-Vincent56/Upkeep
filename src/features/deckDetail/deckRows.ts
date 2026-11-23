@@ -1,12 +1,11 @@
 import type { CatalogIndex } from '../../catalog/catalogIndex';
 import type { Printing } from '../../catalog/types';
+import type { ExactPrinting, Section } from '../../decks/types';
 import type {
   Allocation,
   BuildSnapshot,
-  ExactPrinting,
   PlannedDeck,
   PlannedEntry,
-  Section,
   SnapshotEntry,
 } from '../../planning/types';
 import { printingLabel } from './describe';

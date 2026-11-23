@@ -53,7 +53,7 @@ export default defineConfig([
               message: 'src/catalog must not depend on the app shell or adapters.',
             },
             {
-              group: ['**/planning', '**/planning/**'],
+              group: ['**/planning', '**/planning/**', '**/decks', '**/decks/**'],
               message: 'src/catalog must not depend on player-side modules.',
             },
           ],
@@ -84,6 +84,39 @@ export default defineConfig([
     },
   },
   {
+    files: ['src/decks/**/*.ts'],
+    rules: {
+      // Replaces the src/** entry above for these files, so the Tauri group is repeated.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['react', 'react/*', 'react-dom', 'react-dom/*'],
+              message: 'src/decks is a pure domain module and must not import React.',
+            },
+            { group: ['@tauri-apps/*'], message: TAURI_BOUNDARY_MESSAGE },
+            {
+              group: [
+                '**/app',
+                '**/app/*',
+                '**/adapters',
+                '**/adapters/*',
+                '**/features',
+                '**/features/**',
+              ],
+              message: 'src/decks must not depend on the app shell, adapters, or features.',
+            },
+            {
+              group: ['**/planning', '**/planning/**'],
+              message: 'src/decks must not depend on the planner; the planner reads deck types.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['src/ui/**/*.{ts,tsx}'],
     rules: {
       // Replaces the src/** entry above for these files, so the Tauri group is repeated.
@@ -102,6 +135,8 @@ export default defineConfig([
                 '**/features/**',
                 '**/planning',
                 '**/planning/**',
+                '**/decks',
+                '**/decks/**',
               ],
               message:
                 'src/ui holds presentational pieces only: React and src/catalog, nothing else from the app.',

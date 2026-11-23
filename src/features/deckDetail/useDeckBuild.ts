@@ -1,24 +1,33 @@
 import { useEffect, useReducer, useRef } from 'react';
 import { useDependencies } from '../../app/dependencies';
 import { describeError } from '../../app/describeError';
+import type { DeckEdit } from '../../decks/edits';
+import { createDeckBuildRequests, type DeckBuildRequests } from './deckBuildRequests';
 import { deckBuildReducer, INITIAL_DECK_BUILD_STATE, type DeckBuildState } from './deckBuildState';
-import { loadDeckBuild, replanDeckBuild } from './loadDeckBuild';
+import { loadDeckBuild } from './loadDeckBuild';
 
 export interface DeckBuildHandle {
   readonly state: DeckBuildState;
   setProtected(protectedDeckIds: readonly string[]): void;
+  edit(edit: DeckEdit): void;
 }
 
 export function useDeckBuild(deckId: string): DeckBuildHandle {
   const dependencies = useDependencies();
   const [state, dispatch] = useReducer(deckBuildReducer, INITIAL_DECK_BUILD_STATE);
-  const lastRequest = useRef(0);
+  const requests = useRef<DeckBuildRequests | null>(null);
 
   useEffect(() => {
     let ignore = false;
     loadDeckBuild(dependencies, deckId).then(
       (build) => {
-        if (!ignore) dispatch({ type: 'loaded', build });
+        if (ignore) return;
+
+        requests.current = createDeckBuildRequests(
+          { readers: dependencies, writer: dependencies.deckWriter, dispatch },
+          build,
+        );
+        dispatch({ type: 'loaded', build });
       },
       (error: unknown) => {
         if (!ignore) dispatch({ type: 'loadFailed', message: describeError(error) });
@@ -27,21 +36,13 @@ export function useDeckBuild(deckId: string): DeckBuildHandle {
 
     return () => {
       ignore = true;
+      requests.current = null;
     };
   }, [dependencies, deckId]);
 
-  function setProtected(protectedDeckIds: readonly string[]) {
-    if (state.status !== 'ready') return;
-
-    lastRequest.current += 1;
-    const requestId = lastRequest.current;
-    dispatch({ type: 'replanRequested', requestId, protectedDeckIds });
-    replanDeckBuild(dependencies, state.build, protectedDeckIds).then(
-      (build) => dispatch({ type: 'replanned', requestId, build }),
-      (error: unknown) =>
-        dispatch({ type: 'replanFailed', requestId, message: describeError(error) }),
-    );
-  }
-
-  return { state, setProtected };
+  return {
+    state,
+    setProtected: (protectedDeckIds) => requests.current?.setProtected(protectedDeckIds),
+    edit: (edit) => requests.current?.edit(edit),
+  };
 }

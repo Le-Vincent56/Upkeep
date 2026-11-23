@@ -1,6 +1,7 @@
 import type { CatalogIndex } from '../../catalog/catalogIndex';
 import type { Color, Finish, Printing } from '../../catalog/types';
-import type { Allocation, Block, MoveAllocation, Section } from '../../planning/types';
+import type { Section } from '../../decks/types';
+import type { Allocation, Block, MoveAllocation } from '../../planning/types';
 import type { DeckDetail, DeckFormat } from './contracts';
 import type { CardTypeGroup, DeckRow } from './deckRows';
 
@@ -44,7 +45,7 @@ export const COLOR_WORDS: Record<Color, string> = {
   G: 'Green',
 };
 
-const FINISH_WORDS: Record<Finish, string> = {
+export const FINISH_WORDS: Record<Finish, string> = {
   nonfoil: 'Nonfoil',
   foil: 'Foil',
   etched: 'Etched',

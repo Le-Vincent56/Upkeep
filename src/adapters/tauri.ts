@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import type { AppDependencies } from '../app/dependencies';
 import type { RuntimeInfo } from '../app/runtimeInfo';
 import { seedIndex } from '../catalog/seedCatalog';
-import { createFixtureDeckReaders } from './fixture';
+import { createFixtureDeckStore } from './fixtureDeckStore';
 import { WALKTHROUGH_START_DECK_ID } from './fixtures/walkthroughDecks';
 
 export function createTauriDependencies(): AppDependencies {
@@ -12,7 +12,7 @@ export function createTauriDependencies(): AppDependencies {
     },
     catalog: seedIndex,
     // The desktop serves fixture decks until SQLite arrives
-    ...createFixtureDeckReaders(),
+    ...createFixtureDeckStore(seedIndex),
     startDeckId: WALKTHROUGH_START_DECK_ID,
   };
 }

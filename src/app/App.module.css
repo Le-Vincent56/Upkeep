@@ -44,10 +44,31 @@
   color: var(--color-text-muted);
 }
 
-.column {
+.body {
   flex: 1;
+  display: flex;
   min-height: 0;
+}
+
+.column,
+.inspector {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--color-line) transparent;
+}
+
+.column {
+  flex: 1;
+  min-width: 0;
+}
+
+.inspector {
+  flex: none;
+  width: var(--size-inspector);
+  border-left: 1px solid var(--color-line-soft);
+}
+
+/* The slot takes no room until a screen pins something into it. */
+.inspector:empty {
+  display: none;
 }

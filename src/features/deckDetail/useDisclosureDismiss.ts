@@ -35,8 +35,7 @@ export function useDisclosureDismiss(detailsRef: RefObject<HTMLDetailsElement | 
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('focusin', onFocusI
-n);
+      document.removeEventListener('focusin', onFocusIn);
     };
   }, [detailsRef]);
 }

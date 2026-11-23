@@ -76,11 +76,12 @@ function RowStatus({ shown, filter, names, catalog }: RowProps) {
   );
 }
 
-interface ListRowProps extends RowProps {
+interface StopProps extends RowProps {
   readonly isStop: boolean;
+  readonly isPinned: boolean;
 }
 
-function ListRow({ isStop, ...props }: ListRowProps) {
+function ListRow({ isStop, isPinned, ...props }: StopProps) {
   const { row } = props.shown;
   const artCrop = row.displayPrinting?.images[0]?.artCrop;
   const cost = manaSymbolCodes(row.manaCost);
@@ -91,6 +92,7 @@ function ListRow({ isStop, ...props }: ListRowProps) {
       data-tone={rowTone(row)}
       data-entry-id={row.entryId}
       tabIndex={isStop ? 0 : -1}
+      aria-current={isPinned ? 'true' : undefined}
     >
       {artCrop !== undefined && (
         <span
@@ -110,11 +112,17 @@ function ListRow({ isStop, ...props }: ListRowProps) {
   );
 }
 
-function GridTile(props: RowProps) {
+function GridTile({ isStop, isPinned, ...props }: StopProps) {
   const { row } = props.shown;
 
   return (
-    <li className={styles.tile} data-tone={rowTone(row)}>
+    <li
+      className={styles.tile}
+      data-tone={rowTone(row)}
+      data-entry-id={row.entryId}
+      tabIndex={isStop ? 0 : -1}
+      aria-current={isPinned ? 'true' : undefined}
+    >
       <CardImage key={row.displayPrinting?.id ?? 'none'} row={row} className={styles.tileImage} />
       <div className={styles.tileText}>
         <RowTitle row={row} />
@@ -124,13 +132,25 @@ function GridTile(props: RowProps) {
   );
 }
 
+export type PinSource = 'pointer' | 'keyboard';
+
 interface DeckCardProps {
   readonly arrangement: Arrangement;
   readonly filter: StatusFilter;
   readonly view: ViewMode;
   readonly names: DisplayNames;
   readonly catalog: CatalogIndex;
+  readonly pinnedEntryId: string | null;
+  readonly onPin: (entryId: string, via: PinSource) => void;
+  readonly onUnpin: () => void;
   readonly onClearFilters: () => void;
+}
+
+function entryIdAt(target: EventTarget, container: HTMLElement | null): string | undefined {
+  if (!(target instanceof Element) || container === null) return undefined;
+
+  const row = target.closest<HTMLElement>('li[data-entry-id]');
+  return row !== null && container.contains(row) ? row.dataset.entryId : undefined;
 }
 
 export function DeckCards({
@@ -139,6 +159,9 @@ export function DeckCards({
   view,
   names,
   catalog,
+  pinnedEntryId,
+  onPin,
+  onUnpin,
   onClearFilters,
 }: DeckCardProps) {
   // A new token hides the card, so it must change only with the arrangement or view.
@@ -162,7 +185,8 @@ export function DeckCards({
   }
 
   const rowCount = arrangement.groups.reduce((sum, group) => sum + group.rows.length, 0);
-  const visible = popup.shown;
+  // The pinned card is already in the panel, so its pop-up stays hidden.
+  const visible = popup.shown?.entryId === pinnedEntryId ? null : popup.shown;
   const visibleRow =
     visible === null
       ? undefined
@@ -178,14 +202,29 @@ export function DeckCards({
         data-view={view}
         data-filtered={filter !== 'all'}
         data-single={filter !== 'all' || rowCount < SINGLE_COLUMN_BELOW}
-        onPointerMove={popup.onPointerMove}
+        onPointerMove={view === 'list' ? popup.onPointerMove : undefined}
         onPointerLeave={popup.onPointerLeave}
         onFocus={(event) => {
           focus.onFocus(event);
-          popup.onFocus(event);
+          if (view === 'list') popup.onFocus(event);
         }}
         onBlur={popup.onBlur}
+        onClick={(event) => {
+          const entryId = entryIdAt(event.target, containerRef.current);
+          if (entryId !== undefined) onPin(entryId, 'pointer');
+        }}
         onKeyDown={(event) => {
+          const entryId = entryIdAt(event.target, containerRef.current);
+          if (entryId !== undefined && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            onPin(entryId, 'keyboard');
+            return;
+          }
+          if (event.key === 'Escape' && visible === null && pinnedEntryId !== null) {
+            onUnpin();
+            return;
+          }
+
           popup.onKeyDown(event);
           focus.onKeyDown(event);
         }}
@@ -205,6 +244,8 @@ export function DeckCards({
                     filter={filter}
                     names={names}
                     catalog={catalog}
+                    isStop={shown.row.entryId === focus.stopId}
+                    isPinned={shown.row.entryId === pinnedEntryId}
                   />
                 ) : (
                   <ListRow
@@ -214,6 +255,7 @@ export function DeckCards({
                     names={names}
                     catalog={catalog}
                     isStop={shown.row.entryId === focus.stopId}
+                    isPinned={shown.row.entryId === pinnedEntryId}
                   />
                 ),
               )}

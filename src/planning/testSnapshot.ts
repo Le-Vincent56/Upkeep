@@ -1,12 +1,6 @@
 import type { Finish } from '../catalog/types';
-import type {
-  BuildSnapshot,
-  ExactPrinting,
-  Section,
-  SnapshotDeck,
-  SnapshotEntry,
-  StockRow,
-} from './types';
+import type { ExactPrinting, Section } from '../decks/types';
+import type { BuildSnapshot, SnapshotDeck, SnapshotEntry, StockRow } from './types';
 
 export function exact(printingId: string, finish: Finish | null = null): ExactPrinting {
   return { printingId, finish };

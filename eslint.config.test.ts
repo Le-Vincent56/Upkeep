@@ -76,6 +76,12 @@ describe('catalog boundary', () => {
     ).toEqual(['no-restricted-imports']);
   });
 
+  it('rejects a relative import of decks', async () => {
+    expect(
+      await ruleIds("import type { Section } from '../decks/types';\nexport type P = Section;\n"),
+    ).toEqual(['no-restricted-imports']);
+  });
+
   it('allows sibling catalog imports', async () => {
     expect(
       await ruleIds(
@@ -124,6 +130,71 @@ describe('planning boundary', () => {
       await ruleIds("import type { Finish } from '../catalog/types';\nexport type P = Finish;\n"),
     ).toEqual([]);
   });
+
+  it('allows deck types', async () => {
+    expect(
+      await ruleIds("import type { Section } from '../decks/types';\nexport type P = Section;\n"),
+    ).toEqual([]);
+  });
+});
+
+describe('decks boundary', () => {
+  const DECKS_FILE = 'src/decks/probe.ts';
+
+  async function ruleIds(code: string): Promise<(string | null)[]> {
+    const messages = await boundaryMessages(DECKS_FILE, code);
+    return messages.map((message) => message.ruleId);
+  }
+
+  it('rejects React', async () => {
+    expect(
+      await ruleIds("import { useState } from 'react';\nexport const probe = useState;\n"),
+    ).toEqual(['no-restricted-imports']);
+  });
+
+  it('rejects a relative import of the app shell', async () => {
+    expect(
+      await ruleIds(
+        "import type { RuntimeInfo } from '../app/runtimeInfo';\nexport type P = RuntimeInfo;\n",
+      ),
+    ).toEqual(['no-restricted-imports']);
+  });
+
+  it('rejects a relative import of an adapter', async () => {
+    expect(
+      await ruleIds(
+        "import { createFixtureDependencies } from '../adapters/fixture';\nexport const probe = createFixtureDependencies;\n",
+      ),
+    ).toEqual(['no-restricted-imports']);
+  });
+
+  it('rejects a feature import', async () => {
+    expect(
+      await ruleIds(
+        "import { rowTitle } from '../features/deckDetail/describe';\nexport const probe = rowTitle;\n",
+      ),
+    ).toEqual(['no-restricted-imports']);
+  });
+
+  it('rejects planning', async () => {
+    expect(
+      await ruleIds(
+        "import type { BuildPlan } from '../planning/types';\nexport type P = BuildPlan;\n",
+      ),
+    ).toEqual(['no-restricted-imports']);
+  });
+
+  it('still rejects Tauri', async () => {
+    expect(await ruleIds(STATIC_IMPORT)).toEqual(['no-restricted-imports']);
+  });
+
+  it('allows catalog types and sibling deck modules', async () => {
+    expect(
+      await ruleIds(
+        "import type { Finish } from '../catalog/types';\nimport type { Section } from './types';\nexport type P = [Finish, Section];\n",
+      ),
+    ).toEqual([]);
+  });
 });
 
 describe('ui boundary', () => {
@@ -163,6 +234,12 @@ describe('ui boundary', () => {
       await ruleIds(
         "import type { BuildPlan } from '../planning/types';\nexport type P = BuildPlan;\n",
       ),
+    ).toEqual(['no-restricted-imports']);
+  });
+
+  it('rejects decks', async () => {
+    expect(
+      await ruleIds("import type { Section } from '../decks/types';\nexport type P = Section;\n"),
     ).toEqual(['no-restricted-imports']);
   });
 

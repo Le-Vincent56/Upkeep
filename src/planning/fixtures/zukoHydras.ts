@@ -1,4 +1,5 @@
-import type { BuildSnapshot, ExactPrinting, StockRow } from '../types';
+import type { ExactPrinting } from '../../decks/types';
+import type { BuildSnapshot, StockRow } from '../types';
 
 export const CARDS = {
   solRing: '6ad8011d-3471-4369-9d68-b264cc027487',

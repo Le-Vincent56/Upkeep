@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { CatalogIndex } from '../catalog/catalogIndex';
+import type { DeckWriter } from '../decks/contracts';
 import type { BuildSnapshotReader, DeckDetailReader } from '../features/deckDetail/contracts';
 import type { RuntimeInfoReader } from './runtimeInfo';
 
@@ -8,6 +9,7 @@ export interface AppDependencies {
   catalog: CatalogIndex;
   buildSnapshots: BuildSnapshotReader;
   deckDetails: DeckDetailReader;
+  deckWriter: DeckWriter;
   startDeckId: string;
 }
 
