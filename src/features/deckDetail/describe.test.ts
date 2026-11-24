@@ -19,7 +19,6 @@ import {
   keepTogetherLabel,
   manaCostLabel,
   popupLines,
-  printingLabel,
   rowNeeds,
   rowSuffix,
   rowTitle,
@@ -53,17 +52,6 @@ describe('displayNames', () => {
     expect(names.locationName(IDS.zukoBox)).toBe('Zuko box');
     expect(names.deckName('deck-unknown')).toBe('deck-unknown');
     expect(names.locationName('loc-unknown')).toBe('loc-unknown');
-  });
-});
-
-describe('printingLabel', () => {
-  it('names set and collector number, with an optional finish', () => {
-    const commanderMasters = seeded(PRINTINGS.solRingCommanderMasters);
-
-    expect(printingLabel(commanderMasters, null)).toBe('CMM 410');
-    expect(printingLabel(commanderMasters, 'foil')).toBe('CMM 410 · Foil');
-    expect(printingLabel(commanderMasters, 'etched')).toBe('CMM 410 · Etched');
-    expect(printingLabel(commanderMasters, 'nonfoil')).toBe('CMM 410 · Nonfoil');
   });
 });
 

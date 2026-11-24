@@ -9,6 +9,8 @@ export interface CatalogIndex {
   cardByName(name: string): Card | undefined;
   cardByOracleId(oracleId: string): Card | undefined;
   printingsOf(oracleId: string): readonly Printing[];
+  /** Cards whose names match a typed query: exact first, then name prefix, then word prefix. */
+  searchCards(query: string, limit: number): readonly Card[];
 }
 
 function compareText(a: string, b: string): number {
@@ -59,6 +61,51 @@ function groupPrintings(printings: readonly Printing[]): Map<string, Printing[]>
   return byCard;
 }
 
+interface SearchName {
+  readonly card: Card;
+  readonly sortKey: string;
+  readonly keys: readonly string[];
+}
+
+function searchNames(cards: readonly Card[]): SearchName[] {
+  return cards.map((card) => ({
+    card,
+    sortKey: normalizeName(card.name),
+    keys: [
+      ...new Set([card.name, ...card.faces.map((face) => face.name)].map(normalizeName)),
+    ].filter((key) => key !== ''),
+  }));
+}
+
+const NO_MATCH = 3;
+
+function matchTier(key: string, query: string): number {
+  if (key === query) return 0;
+  if (key.startsWith(query)) return 1;
+  return ` ${key}`.includes(` ${query}`) ? 2 : NO_MATCH;
+}
+
+function bestTier(name: SearchName, query: string): number {
+  return Math.min(...name.keys.map((key) => matchTier(key, query)));
+}
+
+function searchIn(names: readonly SearchName[], query: string, limit: number): Card[] {
+  const normalized = normalizeName(query);
+  if (normalized === '') return [];
+
+  return names
+    .map((name) => ({ name, tier: bestTier(name, normalized) }))
+    .filter(({ tier }) => tier < NO_MATCH)
+    .sort(
+      (a, b) =>
+        a.tier - b.tier ||
+        compareText(a.name.sortKey, b.name.sortKey) ||
+        compareText(a.name.card.oracleId, b.name.card.oracleId),
+    )
+    .slice(0, limit)
+    .map(({ name }) => name.card);
+}
+
 export function buildCatalogIndex(catalog: Catalog): CatalogIndex {
   const cardsById = new Map(catalog.cards.map((card) => [card.oracleId, card] as const));
   const cardsByName = indexNames(catalog.cards);
@@ -67,6 +114,7 @@ export function buildCatalogIndex(catalog: Catalog): CatalogIndex {
     catalog.printings.map((p) => [setNumberKey(p.setCode, p.collectorNumber), p] as const),
   );
   const printingsByCard = groupPrintings(catalog.printings);
+  const names = searchNames(catalog.cards);
 
   return {
     printingById: (id) => printingsById.get(id),
@@ -75,5 +123,6 @@ export function buildCatalogIndex(catalog: Catalog): CatalogIndex {
     cardByName: (name) => cardsByName.get(normalizeName(name)),
     cardByOracleId: (oracleId) => cardsById.get(oracleId),
     printingsOf: (oracleId) => printingsByCard.get(oracleId) ?? [],
+    searchCards: (query, limit) => searchIn(names, query, limit),
   };
 }

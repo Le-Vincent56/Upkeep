@@ -79,9 +79,22 @@ function RowStatus({ shown, filter, names, catalog }: RowProps) {
 interface StopProps extends RowProps {
   readonly isStop: boolean;
   readonly isPinned: boolean;
+  readonly landedCount: number | null;
+  readonly onLandedEnd: () => void;
 }
 
-function ListRow({ isStop, isPinned, ...props }: StopProps) {
+interface LandedLiftProps {
+  readonly count: number | null;
+  readonly onEnd: () => void;
+}
+
+function LandedLift({ count, onEnd }: LandedLiftProps) {
+  // A new key remounts the span, so a second addition to the same row replays the lift.
+  return count === null ? null : (
+    <span key={count} className={styles.landed} aria-hidden="true" onAnimationEnd={onEnd} />
+  );
+}
+function ListRow({ isStop, isPinned, landedCount, onLandedEnd, ...props }: StopProps) {
   const { row } = props.shown;
   const artCrop = row.displayPrinting?.images[0]?.artCrop;
   const cost = manaSymbolCodes(row.manaCost);
@@ -108,11 +121,12 @@ function ListRow({ isStop, isPinned, ...props }: StopProps) {
           <ManaSymbols codes={cost} label={manaCostLabel(cost)} />
         </span>
       )}
+      <LandedLift count={landedCount} onEnd={onLandedEnd} />
     </li>
   );
 }
 
-function GridTile({ isStop, isPinned, ...props }: StopProps) {
+function GridTile({ isStop, isPinned, landedCount, onLandedEnd, ...props }: StopProps) {
   const { row } = props.shown;
 
   return (
@@ -128,11 +142,17 @@ function GridTile({ isStop, isPinned, ...props }: StopProps) {
         <RowTitle row={row} />
         <RowStatus {...props} />
       </div>
+      <LandedLift count={landedCount} onEnd={onLandedEnd} />
     </li>
   );
 }
 
 export type PinSource = 'pointer' | 'keyboard';
+
+export interface Landed {
+  readonly entryId: string;
+  readonly count: number;
+}
 
 interface DeckCardProps {
   readonly arrangement: Arrangement;
@@ -141,9 +161,11 @@ interface DeckCardProps {
   readonly names: DisplayNames;
   readonly catalog: CatalogIndex;
   readonly pinnedEntryId: string | null;
+  readonly landed: Landed | null;
   readonly onPin: (entryId: string, via: PinSource) => void;
   readonly onUnpin: () => void;
   readonly onClearFilters: () => void;
+  readonly onLandedEnd: () => void;
 }
 
 function entryIdAt(target: EventTarget, container: HTMLElement | null): string | undefined {
@@ -160,9 +182,11 @@ export function DeckCards({
   names,
   catalog,
   pinnedEntryId,
+  landed,
   onPin,
   onUnpin,
   onClearFilters,
+  onLandedEnd,
 }: DeckCardProps) {
   // A new token hides the card, so it must change only with the arrangement or view.
   const token = useMemo(() => ({ arrangement, view }), [arrangement, view]);
@@ -246,6 +270,8 @@ export function DeckCards({
                     catalog={catalog}
                     isStop={shown.row.entryId === focus.stopId}
                     isPinned={shown.row.entryId === pinnedEntryId}
+                    landedCount={landed?.entryId === shown.row.entryId ? landed.count : null}
+                    onLandedEnd={onLandedEnd}
                   />
                 ) : (
                   <ListRow
@@ -256,6 +282,8 @@ export function DeckCards({
                     catalog={catalog}
                     isStop={shown.row.entryId === focus.stopId}
                     isPinned={shown.row.entryId === pinnedEntryId}
+                    landedCount={landed?.entryId === shown.row.entryId ? landed.count : null}
+                    onLandedEnd={onLandedEnd}
                   />
                 ),
               )}

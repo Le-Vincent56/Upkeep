@@ -1,5 +1,6 @@
 import type { CatalogIndex } from '../../catalog/catalogIndex';
-import type { Color, Finish, Printing } from '../../catalog/types';
+import { printingLabel } from '../../catalog/printingLabel';
+import type { Color } from '../../catalog/types';
 import type { Section } from '../../decks/types';
 import type { Allocation, Block, MoveAllocation } from '../../planning/types';
 import type { DeckDetail, DeckFormat } from './contracts';
@@ -45,12 +46,6 @@ export const COLOR_WORDS: Record<Color, string> = {
   G: 'Green',
 };
 
-export const FINISH_WORDS: Record<Finish, string> = {
-  nonfoil: 'Nonfoil',
-  foil: 'Foil',
-  etched: 'Etched',
-};
-
 const SUMMARY_WORDS: Record<AllocationStatus, string> = {
   inBox: 'in deck box',
   toMove: 'to move',
@@ -74,11 +69,6 @@ export function displayNames(detail: DeckDetail): DisplayNames {
     deckName: (id) => decks.get(id) ?? id,
     locationName: (id) => locations.get(id) ?? id,
   };
-}
-
-export function printingLabel(printing: Printing, finish: Finish | null): string {
-  const label = `${printing.setCode.toUpperCase()} ${printing.collectorNumber}`;
-  return finish === null ? label : `${label} · ${FINISH_WORDS[finish]}`;
 }
 
 function copiesWith(row: DeckRow, status: AllocationStatus): number {

@@ -106,6 +106,27 @@ describe('askedValues', () => {
       printing: { printingId: PRINTINGS.mountain, finish: 'foil' },
     });
   });
+
+  it('ignores a waiting addition, which never edits an entry by its ID', () => {
+    const waiting: DeckEdit[] = [
+      {
+        kind: 'addCard',
+        entry: {
+          id: IDS.zukoMountain,
+          oracleId: CARDS.mountain,
+          section: 'sideboard',
+          quantity: 9,
+          printing: null,
+        },
+      },
+    ];
+
+    expect(askedValues(mountain, waiting)).toEqual({
+      quantity: 4,
+      section: 'main',
+      printing: null,
+    });
+  });
 });
 
 describe('parseQuantity', () => {

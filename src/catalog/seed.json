@@ -82,6 +82,72 @@
           "toughness": "6"
         }
       ]
+    },
+    {
+      "oracleId": "867f0cdf-cf75-40f0-bf1e-ccb92e55e9a3",
+      "name": "Sol Talisman",
+      "layout": "normal",
+      "manaValue": 0,
+      "colorIdentity": [],
+      "faces": [
+        {
+          "name": "Sol Talisman",
+          "manaCost": "",
+          "typeLine": "Artifact",
+          "oracleText": "Suspend 3—{1} (Rather than cast this card from your hand, pay {1} and exile it with three time counters on it. At the beginning of your upkeep, remove a time counter. When the last is removed, you may cast it without paying its mana cost.)\n{T}: Add {C}{C}.",
+          "colors": []
+        }
+      ]
+    },
+    {
+      "oracleId": "b1544f21-7e98-461b-aed5-e748b0168c52",
+      "name": "Swords to Plowshares",
+      "layout": "normal",
+      "manaValue": 1,
+      "colorIdentity": ["W"],
+      "faces": [
+        {
+          "name": "Swords to Plowshares",
+          "manaCost": "{W}",
+          "typeLine": "Instant",
+          "oracleText": "Exile target creature. Its controller gains life equal to its power.",
+          "colors": ["W"]
+        }
+      ]
+    },
+    {
+      "oracleId": "025939a0-424a-41bf-8fc9-2ef9ea5485f7",
+      "name": "Fire Covenant",
+      "layout": "normal",
+      "manaValue": 3,
+      "colorIdentity": ["B", "R"],
+      "faces": [
+        {
+          "name": "Fire Covenant",
+          "manaCost": "{1}{B}{R}",
+          "typeLine": "Instant",
+          "oracleText": "As an additional cost to cast this spell, pay X life.\nFire Covenant deals X damage divided as you choose among any number of target creatures.",
+          "colors": ["B", "R"]
+        }
+      ]
+    },
+    {
+      "oracleId": "3979067a-9c68-443d-a85f-d9f07be880b9",
+      "name": "Monastery Mentor",
+      "layout": "normal",
+      "manaValue": 3,
+      "colorIdentity": ["W"],
+      "faces": [
+        {
+          "name": "Monastery Mentor",
+          "manaCost": "{2}{W}",
+          "typeLine": "Creature — Human Monk",
+          "oracleText": "Prowess (Whenever you cast a noncreature spell, this creature gets +1/+1 until end of turn.)\nWhenever you cast a noncreature spell, create a 1/1 white Monk creature token with prowess.",
+          "colors": ["W"],
+          "power": "2",
+          "toughness": "2"
+        }
+      ]
     }
   ],
   "printings": [
@@ -183,6 +249,78 @@
           "artCrop": "https://cards.scryfall.io/art_crop/back/4/7/47f7d313-8333-41fe-8bfa-c96774dac228.jpg?1783916971",
           "artist": "David Auden Nash",
           "accent": "#d0435a"
+        }
+      ]
+    },
+    {
+      "id": "a51fb64d-cc0c-400d-971f-78c28d42043b",
+      "oracleId": "867f0cdf-cf75-40f0-bf1e-ccb92e55e9a3",
+      "setCode": "mh2",
+      "setName": "Modern Horizons 2",
+      "collectorNumber": "236",
+      "lang": "en",
+      "releasedOn": "2021-06-18",
+      "finishes": ["nonfoil", "foil"],
+      "scryfallUrl": "https://scryfall.com/card/mh2/236/sol-talisman",
+      "images": [
+        {
+          "normal": "https://cards.scryfall.io/normal/front/a/5/a51fb64d-cc0c-400d-971f-78c28d42043b.jpg?1783926801",
+          "artCrop": "https://cards.scryfall.io/art_crop/front/a/5/a51fb64d-cc0c-400d-971f-78c28d42043b.jpg?1783926801",
+          "artist": "Volkan Baǵa"
+        }
+      ]
+    },
+    {
+      "id": "4645eebf-c9fc-4ee7-b646-61dc1205b4b0",
+      "oracleId": "b1544f21-7e98-461b-aed5-e748b0168c52",
+      "setCode": "trc",
+      "setName": "Star Trek Commander",
+      "collectorNumber": "429",
+      "lang": "en",
+      "releasedOn": "2026-11-13",
+      "finishes": ["nonfoil", "foil"],
+      "scryfallUrl": "https://scryfall.com/card/trc/429/swords-to-plowshares",
+      "images": [
+        {
+          "normal": "https://cards.scryfall.io/normal/front/4/6/4645eebf-c9fc-4ee7-b646-61dc1205b4b0.jpg?1793111861",
+          "artCrop": "https://cards.scryfall.io/art_crop/front/4/6/4645eebf-c9fc-4ee7-b646-61dc1205b4b0.jpg?1793111861",
+          "artist": "Pablo Mendoza"
+        }
+      ]
+    },
+    {
+      "id": "1a13437b-e0c7-4ca9-a0e2-b8cb1b5813ec",
+      "oracleId": "025939a0-424a-41bf-8fc9-2ef9ea5485f7",
+      "setCode": "ecc",
+      "setName": "Lorwyn Eclipsed Commander",
+      "collectorNumber": "54",
+      "lang": "en",
+      "releasedOn": "2026-01-23",
+      "finishes": ["nonfoil"],
+      "scryfallUrl": "https://scryfall.com/card/ecc/54/fire-covenant",
+      "images": [
+        {
+          "normal": "https://cards.scryfall.io/normal/front/1/a/1a13437b-e0c7-4ca9-a0e2-b8cb1b5813ec.jpg?1783911521",
+          "artCrop": "https://cards.scryfall.io/art_crop/front/1/a/1a13437b-e0c7-4ca9-a0e2-b8cb1b5813ec.jpg?1783911521",
+          "artist": "Jeff Miracola"
+        }
+      ]
+    },
+    {
+      "id": "2343e69d-f30e-4826-953c-fbf31c6079e6",
+      "oracleId": "3979067a-9c68-443d-a85f-d9f07be880b9",
+      "setCode": "tdc",
+      "setName": "Tarkir: Dragonstorm Commander",
+      "collectorNumber": "125",
+      "lang": "en",
+      "releasedOn": "2025-04-11",
+      "finishes": ["nonfoil"],
+      "scryfallUrl": "https://scryfall.com/card/tdc/125/monastery-mentor",
+      "images": [
+        {
+          "normal": "https://cards.scryfall.io/normal/front/2/3/2343e69d-f30e-4826-953c-fbf31c6079e6.jpg?1783907121",
+          "artCrop": "https://cards.scryfall.io/art_crop/front/2/3/2343e69d-f30e-4826-953c-fbf31c6079e6.jpg?1783907121",
+          "artist": "Magali Villeneuve"
         }
       ]
     }

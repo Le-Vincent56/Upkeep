@@ -77,6 +77,10 @@
   accent-color: var(--color-text);
 }
 
+.add {
+  margin-left: auto;
+}
+
 .view {
   display: inline-flex;
   align-items: center;

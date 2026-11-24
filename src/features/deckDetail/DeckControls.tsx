@@ -1,4 +1,5 @@
-import { useId, useRef } from 'react';
+import { useId, useRef, type Ref } from 'react';
+import { Button } from '../../ui/Button';
 import { ChoiceSelect } from '../../ui/ChoiceSelect';
 import type { GroupBy, SortBy, StatusFilter, ViewChoices, ViewMode } from './arrangeRows';
 import type { DeckSummary } from './contracts';
@@ -22,6 +23,9 @@ interface DeckControlProps {
   readonly requestedProtectedIds: readonly string[];
   readonly onProtectedChange: (protectedDeckIds: readonly string[]) => void;
   readonly replanError: string | null;
+  readonly adding: boolean;
+  readonly onStartAdding: () => void;
+  readonly addButtonRef: Ref<HTMLButtonElement>;
 }
 
 export function DeckControls({
@@ -35,6 +39,9 @@ export function DeckControls({
   requestedProtectedIds,
   onProtectedChange,
   replanError,
+  adding,
+  onStartAdding,
+  addButtonRef,
 }: DeckControlProps) {
   const viewLabelId = useId();
   const keepRef = useRef<HTMLDetailsElement>(null);
@@ -110,6 +117,16 @@ export function DeckControls({
             </button>
           ))}
         </div>
+        {!adding && (
+          <Button
+            ref={addButtonRef}
+            weight="outline"
+            className={styles.add}
+            onClick={onStartAdding}
+          >
+            Add to deck
+          </Button>
+        )}
       </div>
 
       {choices.filter !== 'all' && (

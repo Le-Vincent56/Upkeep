@@ -3,7 +3,7 @@ import type { Finish } from '../../catalog/types';
 import { MAX_QUANTITY, type DeckEdit } from '../../decks/edits';
 import type { DeckEntry, ExactPrinting, Section } from '../../decks/types';
 import type { DeckRow } from './deckRows';
-import { FINISH_WORDS, printingLabel } from './describe';
+import { FINISH_WORDS, printingLabel } from '../../catalog/printingLabel';
 
 export interface Choice {
   readonly value: string;
@@ -64,7 +64,8 @@ export function askedValues(row: DeckRow, pendingEdits: readonly DeckEdit[]): As
   };
 
   for (const edit of pendingEdits) {
-    if (edit.kind === 'addEntry' || edit.entryId !== row.entryId) continue;
+    if (edit.kind === 'addEntry' || edit.kind === 'addCard' || edit.entryId !== row.entryId)
+      continue;
 
     switch (edit.kind) {
       case 'setQuantity':

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DeckEdit } from '../../decks/edits';
 import { IDS } from '../../planning/fixtures/zukoHydras';
+import type { DeckDetail } from './contracts';
 import {
   deckBuildReducer,
   INITIAL_DECK_BUILD_STATE,
@@ -258,5 +259,40 @@ describe('deckBuildReducer edits', () => {
     expect(state.build).toBe(kept);
     expect(state.pendingEdits).toEqual([]);
     expect(state.replanError).toBe('boom');
+  });
+});
+
+describe('deckBuildReducer detailReloaded', () => {
+  const plan = { decks: [] } as unknown as DeckBuild['plan'];
+  const detail = { id: IDS.zuko, gamePlan: 'Go wide, then swing.' } as unknown as DeckDetail;
+  const moreMountains: DeckEdit = { kind: 'setQuantity', entryId: IDS.zukoMountain, quantity: 5 };
+
+  it('replaces only the detail', () => {
+    const before: ReadyDeckBuild = {
+      ...ready({ ...kept, plan }),
+      pendingRequest: 3,
+      pendingEdits: [moreMountains],
+      replanError: 'earlier',
+      editError: { entryId: IDS.zukoSolRing, message: 'earlier' },
+    };
+    const state = readyOf(deckBuildReducer(before, { type: 'detailReloaded', detail }));
+
+    expect(state.build.detail).toBe(detail);
+    expect(state.build.plan).toBe(plan);
+    expect(state.build.protectedDeckIds).toBe(before.build.protectedDeckIds);
+    expect(state.requestedProtectedIds).toBe(before.requestedProtectedIds);
+    expect(state.pendingRequest).toBe(3);
+    expect(state.pendingEdits).toBe(before.pendingEdits);
+    expect(state.replanError).toBe('earlier');
+    expect(state.editError).toBe(before.editError);
+  });
+
+  it('ignores a reloaded detail while loading or failed', () => {
+    const failed: DeckBuildState = { status: 'failed', message: 'boom' };
+
+    expect(deckBuildReducer(INITIAL_DECK_BUILD_STATE, { type: 'detailReloaded', detail })).toBe(
+      INITIAL_DECK_BUILD_STATE,
+    );
+    expect(deckBuildReducer(failed, { type: 'detailReloaded', detail })).toBe(failed);
   });
 });

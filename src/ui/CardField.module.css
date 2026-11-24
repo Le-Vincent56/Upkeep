@@ -1,0 +1,78 @@
+.field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.label {
+  font-size: var(--text-caps);
+  font-weight: 600;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-1-5) var(--space-2);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+}
+
+.input:hover {
+  border-color: var(--color-line-strong);
+}
+
+.list {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  left: 0;
+  z-index: var(--layer-menu);
+  margin: 0;
+  padding: var(--space-1);
+  list-style: none;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-raised);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--size-row);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius);
+  font-size: var(--text-small);
+  cursor: pointer;
+}
+
+.option[aria-selected='true'] {
+  background: var(--color-line-soft);
+  box-shadow: inset 0 0 0 1px var(--color-line-strong);
+}
+
+.name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.printing {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.cost {
+  flex: none;
+  display: inline-flex;
+  margin-left: auto;
+  font-size: var(--text-mana-row);
+}

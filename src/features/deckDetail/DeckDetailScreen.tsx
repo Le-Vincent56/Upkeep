@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useDependencies } from '../../app/dependencies';
 import { useInspectorSlot } from '../../app/inspectorSlot';
 import type { DeckEdit } from '../../decks/edits';
-import type { DeckEntry } from '../../decks/types';
+import type { DeckEntry, Section } from '../../decks/types';
+import { AddToDeckBand } from './AddToDeckBand';
 import { accentProps } from './accent';
 import {
   arrangeRows,
@@ -14,7 +15,7 @@ import {
 } from './arrangeRows';
 import { BuildSummary } from './BuildSummary';
 import type { EditError, ReadyDeckBuild } from './deckBuildState';
-import { DeckCards, type PinSource } from './DeckCards';
+import { DeckCards, type Landed, type PinSource } from './DeckCards';
 import { DeckControls } from './DeckControls';
 import styles from './DeckDetailScreen.module.css';
 import { DeckHeader } from './DeckHeader';
@@ -24,6 +25,7 @@ import { displayNames, headerArt } from './describe';
 import { askedValues, entryOfRow, togglePin } from './inspector';
 import { offeredDecks } from './loadDeckBuild';
 import { useDeckBuild } from './useDeckBuild';
+import type { AddOutcome } from './deckBuildRequests';
 
 interface Pin {
   readonly entryId: string;
@@ -47,14 +49,27 @@ interface ReadyDeckProps {
   readonly state: ReadyDeckBuild;
   readonly onProtectedChange: (protectedDeckIds: readonly string[]) => void;
   readonly onEdit: (edit: DeckEdit) => void;
+  readonly onAddCard: (entry: DeckEntry) => Promise<AddOutcome>;
 }
 
-function ReadyDeck({ state, onProtectedChange, onEdit }: ReadyDeckProps) {
+function ReadyDeck({ state, onProtectedChange, onEdit, onAddCard }: ReadyDeckProps) {
   const { catalog } = useDependencies();
   const slot = useInspectorSlot();
   const [choices, setChoices] = useState<ViewChoices>(DEFAULT_VIEW_CHOICES);
   const [view, setView] = useState<ViewMode>('list');
   const [pin, setPin] = useState<Pin | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [section, setSection] = useState<Section>('main');
+  const [landed, setLanded] = useState<Landed | null>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const focusAddButton = useRef(false);
+
+  useEffect(() => {
+    if (adding || !focusAddButton.current) return;
+
+    focusAddButton.current = false;
+    addButtonRef.current?.focus();
+  }, [adding]);
 
   const { build } = state;
   const names = useMemo(() => displayNames(build.detail), [build.detail]);
@@ -81,6 +96,15 @@ function ReadyDeck({ state, onProtectedChange, onEdit }: ReadyDeckProps) {
       const focusKey = via === 'keyboard' ? (current?.focusKey ?? 0) + 1 : null;
       return { entryId, card, removed: null, focusKey, errorBefore: state.editError };
     });
+  }
+
+  function closeBand() {
+    focusAddButton.current = true;
+    setAdding(false);
+  }
+
+  function markLanded(entryId: string) {
+    setLanded((current) => ({ entryId, count: (current?.count ?? 0) + 1 }));
   }
 
   function unpin() {
@@ -139,7 +163,20 @@ function ReadyDeck({ state, onProtectedChange, onEdit }: ReadyDeckProps) {
         requestedProtectedIds={state.requestedProtectedIds}
         onProtectedChange={onProtectedChange}
         replanError={state.replanError}
+        adding={adding}
+        onStartAdding={() => setAdding(true)}
+        addButtonRef={addButtonRef}
       />
+      {adding && (
+        <AddToDeckBand
+          catalog={catalog}
+          section={section}
+          onSection={setSection}
+          onAdd={onAddCard}
+          onLanded={markLanded}
+          onClose={closeBand}
+        />
+      )}
       <DeckCards
         arrangement={arrangement}
         filter={choices.filter}
@@ -147,6 +184,8 @@ function ReadyDeck({ state, onProtectedChange, onEdit }: ReadyDeckProps) {
         names={names}
         catalog={catalog}
         pinnedEntryId={pin?.entryId ?? null}
+        landed={landed}
+        onLandedEnd={() => setLanded(null)}
         onPin={pinRow}
         onUnpin={() => setPin(null)}
         onClearFilters={() => setFilter('all')}
@@ -178,7 +217,7 @@ function ReadyDeck({ state, onProtectedChange, onEdit }: ReadyDeckProps) {
 }
 
 export function DeckDetailScreen({ deckId }: { readonly deckId: string }) {
-  const { state, setProtected, edit } = useDeckBuild(deckId);
+  const { state, setProtected, edit, addCard } = useDeckBuild(deckId);
 
   return (
     <main className={styles.screen}>
@@ -189,7 +228,12 @@ export function DeckDetailScreen({ deckId }: { readonly deckId: string }) {
         </p>
       )}
       {state.status === 'ready' && (
-        <ReadyDeck state={state} onProtectedChange={setProtected} onEdit={edit} />
+        <ReadyDeck
+          state={state}
+          onProtectedChange={setProtected}
+          onEdit={edit}
+          onAddCard={addCard}
+        />
       )}
     </main>
   );

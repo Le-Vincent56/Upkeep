@@ -8,7 +8,7 @@ import type {
   PlannedEntry,
   SnapshotEntry,
 } from '../../planning/types';
-import { printingLabel } from './describe';
+import { printingLabel } from '../../catalog/printingLabel';
 
 export type CardTypeGroup =
   | 'creature'

@@ -11,6 +11,7 @@
   --color-text-muted: #94939a;
   --color-text-dim: #5d5c63;
   --color-accent: var(--color-text);
+  --color-on-accent: var(--color-bg);
   --color-focus: var(--color-text);
 
   --color-status-in-box: #6c6b73;
@@ -68,6 +69,7 @@
 
   --motion-quick: 100ms;
   --motion-settle: 200ms;
+  --motion-landed: 1200ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-pop: cubic-bezier(0.18, 0.9, 0.3, 1.3);
 }
@@ -76,6 +78,8 @@
 :root,
 [data-accent] {
   --color-status-move: color-mix(in srgb, var(--color-accent) 55%, #fff);
+  --color-accent-hover: color-mix(in srgb, var(--color-accent) 86%, #fff);
+  --color-accent-pressed: color-mix(in srgb, var(--color-accent) 88%, #000);
 }
 
 body {
@@ -116,5 +120,6 @@ input {
   :root {
     --motion-quick: 0ms;
     --motion-settle: 0ms;
+    --motion-landed: 0ms;
   }
 }

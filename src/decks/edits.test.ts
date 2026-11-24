@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { seedIndex } from '../catalog/seedCatalog';
-import { applyDeckEdit, DeckEditError, editedEntryId, type DeckEdit } from './edits';
+import {
+  applyDeckEdit,
+  DeckEditError,
+  editedEntryId,
+  findMatchingEntry,
+  type DeckEdit,
+} from './edits';
 import type { DeckEntry } from './types';
 
 // The walkthrough's Zuko entries, restated here because src/decks may not import src/planning.
@@ -243,5 +249,163 @@ describe('editedEntryId', () => {
       IDS.zukoMountain,
     );
     expect(editedEntryId({ kind: 'addEntry', entry: NEW_ENTRY })).toBe(NEW_ENTRY.id);
+    expect(editedEntryId({ kind: 'addCard', entry: NEW_ENTRY })).toBe(NEW_ENTRY.id);
+  });
+});
+
+function card(
+  oracleId: string,
+  section: DeckEntry['section'],
+  quantity: number,
+  printing: DeckEntry['printing'] = null,
+  id = 'entry-new',
+): DeckEntry {
+  return { id, oracleId, section, quantity, printing };
+}
+
+function addCard(entry: DeckEntry, entries: readonly DeckEntry[] = zukoEntries()): DeckEntry[] {
+  return apply({ kind: 'addCard', entry }, entries);
+}
+
+function addCardRejection(entry: DeckEntry): { code: string; message: string } {
+  return rejection({ kind: 'addCard', entry });
+}
+
+describe('addCard', () => {
+  it('appends a card the deck has no matching entry for', () => {
+    const result = addCard(NEW_ENTRY);
+
+    expect(result).toHaveLength(4);
+    expect(result[3]).toEqual(NEW_ENTRY);
+  });
+
+  it('raises the matching entry in place and leaves the sent ID unused', () => {
+    const entries = zukoEntries();
+    const result = addCard(card(CARDS.solRing, 'main', 1), entries);
+
+    expect(result).toHaveLength(3);
+    expect(result[0]).toEqual({ ...entryOf(entries, IDS.zukoSolRing), quantity: 2 });
+    expect(result.some((entry) => entry.id === 'entry-new')).toBe(false);
+    expect(entries[0]?.quantity).toBe(1);
+  });
+
+  it('appends when the printing differs', () => {
+    const exact = { printingId: PRINTINGS.solRingCommanderMasters, finish: null };
+    const result = addCard(card(CARDS.solRing, 'main', 1, exact));
+
+    expect(result).toHaveLength(4);
+    expect(result[3]?.printing).toEqual(exact);
+    expect(entryOf(result, IDS.zukoSolRing).quantity).toBe(1);
+  });
+
+  it('raises an entry with the same exact printing and finish', () => {
+    const tle = { printingId: PRINTINGS.solRingAvatar, finish: null };
+    const result = addCard(card(CARDS.solRing, 'maybeboard', 1, tle));
+
+    expect(result).toHaveLength(3);
+    expect(entryOf(result, IDS.zukoMaybeSolRing).quantity).toBe(2);
+  });
+
+  it('appends when only the finish differs', () => {
+    const tleNonfoil = { printingId: PRINTINGS.solRingAvatar, finish: 'nonfoil' as const };
+    const result = addCard(card(CARDS.solRing, 'maybeboard', 1, tleNonfoil));
+
+    expect(result).toHaveLength(4);
+    expect(entryOf(result, IDS.zukoMaybeSolRing).quantity).toBe(1);
+  });
+
+  it('appends when the section differs', () => {
+    const result = addCard(card(CARDS.mountain, 'sideboard', 2));
+
+    expect(result).toHaveLength(4);
+    expect(entryOf(result, IDS.zukoMountain).quantity).toBe(4);
+  });
+
+  it('raises the first of several matching entries', () => {
+    const entries = [
+      ...zukoEntries(),
+      card(CARDS.solRing, 'main', 3, null, 'entry-second-sol-ring'),
+    ];
+    const result = addCard(card(CARDS.solRing, 'main', 1), entries);
+
+    expect(entryOf(result, IDS.zukoSolRing).quantity).toBe(2);
+    expect(entryOf(result, 'entry-second-sol-ring').quantity).toBe(3);
+  });
+
+  it('keeps a raised quantity within 999', () => {
+    expect(addCardRejection(card(CARDS.mountain, 'main', 996))).toEqual({
+      code: 'badQuantity',
+      message: 'A quantity must be a whole number from 1 to 999',
+    });
+    expect(entryOf(addCard(card(CARDS.mountain, 'main', 995)), IDS.zukoMountain).quantity).toBe(
+      999,
+    );
+  });
+
+  it('rejects an addition sent twice instead of merging it into the entry it made', () => {
+    const once = addCard(NEW_ENTRY);
+
+    let caught: unknown;
+    try {
+      addCard(NEW_ENTRY, once);
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(DeckEditError);
+    expect((caught as DeckEditError).code).toBe('duplicateEntry');
+  });
+
+  it('checks the card, quantity, and printing as addEntry does', () => {
+    expect(addCardRejection({ ...NEW_ENTRY, oracleId: 'card-missing' })).toEqual({
+      code: 'unknownCard',
+      message: 'No card with id card-missing',
+    });
+    expect(addCardRejection({ ...NEW_ENTRY, quantity: 0 }).code).toBe('badQuantity');
+    expect(
+      addCardRejection(
+        card(CARDS.mountain, 'main', 1, {
+          printingId: PRINTINGS.solRingCommanderMasters,
+          finish: null,
+        }),
+      ).code,
+    ).toBe('wrongPrinting');
+  });
+});
+
+describe('findMatchingEntry', () => {
+  it('matches card, section, and printing, ignoring ID and quantity', () => {
+    const entries = zukoEntries();
+
+    expect(findMatchingEntry(entries, card(CARDS.solRing, 'main', 7, null, 'other'))?.id).toBe(
+      IDS.zukoSolRing,
+    );
+    expect(
+      findMatchingEntry(
+        entries,
+        card(CARDS.solRing, 'maybeboard', 1, { printingId: PRINTINGS.solRingAvatar, finish: null }),
+      )?.id,
+    ).toBe(IDS.zukoMaybeSolRing);
+  });
+
+  it('tells any printing, a printing, and a finish apart', () => {
+    const entries = zukoEntries();
+
+    expect(findMatchingEntry(entries, card(CARDS.solRing, 'maybeboard', 1))).toBeUndefined();
+    expect(
+      findMatchingEntry(
+        entries,
+        card(CARDS.solRing, 'main', 1, { printingId: PRINTINGS.solRingAvatar, finish: null }),
+      ),
+    ).toBeUndefined();
+    expect(
+      findMatchingEntry(
+        entries,
+        card(CARDS.solRing, 'maybeboard', 1, {
+          printingId: PRINTINGS.solRingAvatar,
+          finish: 'nonfoil',
+        }),
+      ),
+    ).toBeUndefined();
   });
 });

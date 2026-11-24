@@ -80,3 +80,43 @@ describe('stylesheets', () => {
     ]);
   });
 });
+
+interface SeedImage {
+  readonly accent?: string;
+}
+
+interface SeedPrinting {
+  readonly images: readonly SeedImage[];
+}
+
+function channel(hex: string): number {
+  const value = Number.parseInt(hex, 16) / 255;
+  return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+}
+
+function luminance(color: string): number {
+  const [r = 0, g = 0, b = 0] = [1, 3, 5].map((at) => channel(color.slice(at, at + 2)));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrast(a: string, b: string): number {
+  const [light = 0, dark = 0] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (light + 0.05) / (dark + 0.05);
+}
+
+// The filled next action sets --color-on-accent (the background colour) on the deck's accent,
+// and a deck's accent is its header art's first image.
+describe('accent contrast', () => {
+  it('keeps background-coloured text readable on every header accent', () => {
+    const background = /--color-bg:\s*(#[0-9a-f]{6})\s*;/i.exec(tokens)?.[1];
+    const seed = JSON.parse(readFileSync(join(SRC, 'catalog', 'seed.json'), 'utf8')) as {
+      readonly printings: readonly SeedPrinting[];
+    };
+    const accents = seed.printings.flatMap((printing) => printing.images[0]?.accent ?? []);
+
+    expect(background).toBeDefined();
+    expect(accents.length).toBeGreaterThan(0);
+    const unreadable = accents.filter((accent) => contrast(accent, background ?? '') < 4.5);
+    expect(unreadable).toEqual([]);
+  });
+});

@@ -146,3 +146,72 @@ describe('buildCatalogIndex', () => {
 function faceNamed(name: string): Record<string, unknown> {
   return { name, manaCost: '{1}', typeLine: 'Artifact', oracleText: '', colors: [] };
 }
+
+function namesFor(query: string, limit = 8, index: CatalogIndex = seedIndex): string[] {
+  return index.searchCards(query, limit).map((card) => card.name);
+}
+
+function namedCard(n: number, name: string): unknown {
+  return rawCard({
+    oracleId: `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`,
+    name,
+    faces: [faceNamed(name)],
+  });
+}
+
+function printingOfCard(n: number): unknown {
+  return rawPrinting({
+    id: `00000000-0000-4000-8000-${String(n + 500).padStart(12, '0')}`,
+    oracleId: `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`,
+    collectorNumber: String(n),
+  });
+}
+
+describe('searchCards', () => {
+  it('matches the spec examples over the seed', () => {
+    expect(namesFor('s')).toEqual(['Sol Ring', 'Sol Talisman', 'Swords to Plowshares']);
+    expect(namesFor('sol')).toEqual(['Sol Ring', 'Sol Talisman']);
+    expect(namesFor('fire')).toEqual(['Fire Covenant', 'Fire Lord Zuko']);
+    expect(namesFor('Fire Lord Zuko')).toEqual(['Fire Lord Zuko']);
+    expect(namesFor('zuko')).toEqual(['Fire Lord Zuko']);
+    expect(namesFor('mo')).toEqual(['Monastery Mentor', 'Mountain']);
+    expect(namesFor('engine')).toEqual(['Polukranos Reborn // Polukranos, Engine of Ruin']);
+    expect(namesFor('plowshares')).toEqual(['Swords to Plowshares']);
+  });
+
+  it('finds nothing for an unknown or empty query', () => {
+    expect(namesFor('xyz')).toEqual([]);
+    expect(namesFor('')).toEqual([]);
+    expect(namesFor('   ')).toEqual([]);
+    expect(namesFor('ring sol')).toEqual([]);
+  });
+
+  it('normalises the query as names are normalised', () => {
+    expect(namesFor('  FIRE  lord ')).toEqual(['Fire Lord Zuko']);
+    expect(namesFor('fire-lord')).toEqual(['Fire Lord Zuko']);
+    expect(namesFor('SOL')).toEqual(['Sol Ring', 'Sol Talisman']);
+  });
+
+  it('ranks exact, then name prefix, then word prefix, before name order', () => {
+    const index = indexOf(
+      [namedCard(11, 'Ancient Bolt'), namedCard(12, 'Bolt Rider'), namedCard(13, 'Bolt')],
+      [printingOfCard(11), printingOfCard(12), printingOfCard(13)],
+    );
+
+    expect(namesFor('bolt', 8, index)).toEqual(['Bolt', 'Bolt Rider', 'Ancient Bolt']);
+    expect(namesFor('bol', 8, index)).toEqual(['Bolt', 'Bolt Rider', 'Ancient Bolt']);
+    expect(namesFor('rider', 8, index)).toEqual(['Bolt Rider']);
+  });
+
+  it('lists a card once, in its best tier, whichever name matched', () => {
+    expect(namesFor('polukranos')).toEqual(['Polukranos Reborn // Polukranos, Engine of Ruin']);
+    expect(namesFor('polukranos reborn')).toEqual([
+      'Polukranos Reborn // Polukranos, Engine of Ruin',
+    ]);
+  });
+
+  it('keeps only the first matches up to the limit', () => {
+    expect(namesFor('s', 2)).toEqual(['Sol Ring', 'Sol Talisman']);
+    expect(namesFor('s', 0)).toEqual([]);
+  });
+});
